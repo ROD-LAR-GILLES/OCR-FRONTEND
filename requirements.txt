@@ -32,3 +32,4 @@ python-multipart>=0.0.6 # Soporte para form-data en FastAPI
 markdown2>=2.4.10       # Procesamiento de Markdown
 pydantic>=2.5.0         # Validación de datos
 sqlalchemy>=2.0.0       # ORM para base de datos
+
