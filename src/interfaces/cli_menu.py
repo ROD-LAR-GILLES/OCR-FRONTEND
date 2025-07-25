@@ -10,9 +10,10 @@ Features:
 import sys
 from pathlib import Path
 from loguru import logger
-from domain.use_cases import PDFToMarkdownUseCase
 from interfaces.config_menu import ConfigMenu
 from config.llm_config import LLMConfig
+from adapters.pymupdf_adapter import extract_markdown
+from infrastructure.file_storage import save_markdown
 
 # ───────────────────────── Helpers ──────────────────────────
 def _show_llm_status() -> None:
@@ -25,9 +26,12 @@ def _convert_pdf(pdf_path: Path) -> None:
     """Convert PDF to Markdown using current configuration."""
     logger.info(f"Converting to Markdown: {pdf_path}")
     try:
-        use_case = PDFToMarkdownUseCase()
-        md_path = use_case.execute(str(pdf_path))
-        print(f"[OK] Markdown generated: {md_path}")
+        # Extraer contenido markdown del PDF
+        markdown_content = extract_markdown(pdf_path)
+        
+        # Guardar el resultado
+        output_path = save_markdown(pdf_path.stem, markdown_content)
+        print(f"[OK] Markdown generated: {output_path}")
     except Exception as e:
         logger.exception("Error in PDF conversion")
         print(f"[ERROR] Failed to convert PDF: {e}")

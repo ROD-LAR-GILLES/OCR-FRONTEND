@@ -24,7 +24,8 @@ def main() -> None:
     # ─── Modo no interactivo ───
     if len(sys.argv) > 1:
         from pathlib import Path
-        from domain.use_cases import PDFToMarkdownUseCase
+        from adapters.pymupdf_adapter import extract_markdown
+        from infrastructure.file_storage import save_markdown
 
         pdf_arg = Path(sys.argv[1])
         if not pdf_arg.exists():
@@ -32,9 +33,9 @@ def main() -> None:
             return
 
         try:
-            use_case = PDFToMarkdownUseCase()
-            md_path = use_case.execute(str(pdf_arg))
-            print(f"[OK] Markdown generado: {md_path}")
+            markdown_content = extract_markdown(pdf_arg)
+            output_path = save_markdown(pdf_arg.stem, markdown_content)
+            print(f"[OK] Markdown generado: {output_path}")
         except Exception as exc:
             logger.exception(exc)
             print("[ERROR] Falló la conversión a Markdown.")
