@@ -2,7 +2,7 @@
 Módulo de infraestructura encargado del almacenamiento de resultados del procesamiento OCR de archivos PDF.
 
 Este módulo define funciones para guardar el contenido extraído en formato Markdown. Los archivos generados
-se escriben en el directorio `resultado/`, utilizando como nombre base el del archivo PDF procesado.
+se escriben en el directorio `result/`, utilizando como nombre base el del archivo PDF procesado.
 
 También maneja el almacenamiento de logs de las interacciones con la API de OpenAI y el estado de las
 conversaciones para propósitos de auditoría, debugging y continuidad de contexto.
@@ -18,7 +18,7 @@ from typing import Dict, Any, List, Optional
 from loguru import logger
 
 # Directorios de trabajo
-OUTPUT_DIR = Path("resultado")
+OUTPUT_DIR = Path("result")
 LOGS_DIR = Path("logs")
 API_LOGS_DIR = LOGS_DIR / "api_calls"
 CONVERSATIONS_DIR = LOGS_DIR / "conversations"

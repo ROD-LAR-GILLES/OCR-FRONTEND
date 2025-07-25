@@ -4,7 +4,7 @@ services:
     container_name: ocr-pymupdf
     volumes:
       - ./pdfs:/app/pdfs
-      - ./resultado:/app/resultado
+      - ./result:/app/result
       - ./src:/app/src
       - ./data:/app/data
     stdin_open: true
