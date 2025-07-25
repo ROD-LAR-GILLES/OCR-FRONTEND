@@ -30,7 +30,7 @@ docker-compose.override.yml
 *.old
 
 # Archivos de resultados o datos procesados
-resultado/
+result/
 pdfs/
 
 # Archivos de dependencias locales
