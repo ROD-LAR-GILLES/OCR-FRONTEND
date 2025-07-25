@@ -10,7 +10,7 @@ Features:
 import sys
 from pathlib import Path
 from loguru import logger
-from domain.use_cases import convert_pdf_to_md
+from domain.use_cases import PDFToMarkdownUseCase
 from interfaces.config_menu import ConfigMenu
 from config.llm_config import LLMConfig
 
@@ -25,7 +25,8 @@ def _convert_pdf(pdf_path: Path) -> None:
     """Convert PDF to Markdown using current configuration."""
     logger.info(f"Converting to Markdown: {pdf_path}")
     try:
-        md_path = convert_pdf_to_md(pdf_path)
+        use_case = PDFToMarkdownUseCase()
+        md_path = use_case.execute(str(pdf_path))
         print(f"[OK] Markdown generated: {md_path}")
     except Exception as e:
         logger.exception("Error in PDF conversion")

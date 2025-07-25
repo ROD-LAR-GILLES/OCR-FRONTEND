@@ -1,5 +1,5 @@
 from loguru import logger
-from interfaces.cli_menu import mostrar_menu
+from interfaces.cli_menu import main_loop
 import sys
 
 def main() -> None:
@@ -24,7 +24,7 @@ def main() -> None:
     # ─── Modo no interactivo ───
     if len(sys.argv) > 1:
         from pathlib import Path
-        from domain.use_cases import convert_pdf_to_md
+        from domain.use_cases import PDFToMarkdownUseCase
 
         pdf_arg = Path(sys.argv[1])
         if not pdf_arg.exists():
@@ -32,7 +32,8 @@ def main() -> None:
             return
 
         try:
-            md_path = convert_pdf_to_md(pdf_arg)
+            use_case = PDFToMarkdownUseCase()
+            md_path = use_case.execute(str(pdf_arg))
             print(f"[OK] Markdown generado: {md_path}")
         except Exception as exc:
             logger.exception(exc)
@@ -40,7 +41,7 @@ def main() -> None:
         return  # Salir sin mostrar menú
         
     try:
-        mostrar_menu()
+        main_loop()
     except Exception as exc:
         logger.exception(exc)
         print("[ERROR] Ocurrió un problema. Revisa ocr.json")
