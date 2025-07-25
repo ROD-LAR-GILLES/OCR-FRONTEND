@@ -2,16 +2,17 @@
 
 Sistema de OCR y procesamiento de documentos PDF basado en arquitectura hexagonal.
 
-##  Características Principales
+## Características Principales
 
 - Extracción de texto de PDFs digitales y escaneados
 - Detección y extracción de tablas
 - Refinamiento de texto usando LLMs (OpenAI, Google Gemini)
 - Caché de resultados OCR para optimización
 - Sistema de corrección manual de palabras
+- Detección avanzada de idiomas con múltiples estrategias
 - Soporte multilenguaje
 
-##  Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 src/
@@ -23,10 +24,16 @@ src/
 │   └── dtos/          # Objetos de transferencia de datos
 │
 ├── adapters/           # Implementaciones de puertos
-│   ├── ocr_adapter.py      # Adaptador OCR (Tesseract)
-│   ├── pymupdf_adapter.py  # Adaptador PDF
-│   ├── llm_refiner.py     # Refinamiento con LLMs
-│   └── providers/         # Proveedores LLM (OpenAI, Gemini)
+│   ├── ocr_adapter.py          # Adaptador OCR (Tesseract)
+│   ├── pymupdf_adapter.py      # Adaptador PDF
+│   ├── llm_refiner.py         # Refinamiento con LLMs
+│   ├── language_detector.py   # Detector de idiomas (heurístico)
+│   ├── fasttext_detector.py   # Detector avanzado con FastText
+│   ├── language_factory.py    # Fábrica de detectores de idiomas
+│   └── providers/            # Proveedores de servicios externos
+│       ├── llm_factory.py     # Fábrica de proveedores LLM
+│       ├── openai_provider.py # Proveedor OpenAI
+│       └── gemini_provider.py # Proveedor Google Gemini
 │
 ├── infrastructure/     # Servicios técnicos
 │   ├── file_storage.py    # Almacenamiento de archivos
@@ -38,54 +45,70 @@ src/
 │   └── config_menu.py     # Menú de configuración
 │
 └── config/            # Configuración del sistema
-    └── settings.py        # Ajustes globales
+    ├── settings.py        # Ajustes globales
+    └── language_detection.py # Configuración detección de idiomas
 ```
 
-##  Casos de Uso Principales
+## Casos de Uso Principales
 
 1. **Procesamiento de PDFs Digitales**
+
    - Extracción directa de texto
    - Preservación de formato y estructura
 
 2. **Procesamiento de PDFs Escaneados**
+
    - OCR con Tesseract
    - Optimización mediante caché
    - Corrección manual de palabras
 
 3. **Extracción de Tablas**
+
    - Detección automática
    - Conversión a formato estructurado
 
 4. **Refinamiento de Texto**
+
    - Mejora mediante LLMs
    - Múltiples proveedores disponibles
    - Control de costos y tokens
 
-##  Tecnologías Utilizadas
+5. **Detección Avanzada de Idiomas**
+   - Múltiples estrategias de detección:
+     - Simple (español por defecto)
+     - Heurística (análisis de patrones lingüísticos)
+     - FastText (modelo ML preentrenado)
+   - Arquitectura extensible mediante patrón Factory
+   - Configuración centralizada
+
+## Tecnologías Utilizadas
 
 - **Python 3.11+**
 - **PyMuPDF**: Procesamiento de PDFs
 - **Tesseract**: Motor OCR
 - **OpenAI/Gemini**: Refinamiento de texto
+- **FastText** (opcional): Detección avanzada de idiomas
 - **FAISS/Chroma**: Vectorización y búsqueda
 - **SQLite**: Almacenamiento local
 
-##  Requisitos
+## Requisitos
 
 1. Python 3.11 o superior
 2. Tesseract OCR instalado
 3. Variables de entorno configuradas
 4. Dependencias Python instaladas
 
-##  Configuración
+## Configuración
 
 1. Clonar el repositorio:
+
    ```bash
    git clone https://github.com/ROD-LAR-GILLES/OCR-PYMUPDF.git
    cd OCR-PYMUPDF
    ```
 
 2. Instalar dependencias:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -96,9 +119,10 @@ src/
    # Editar .env con tus claves API
    ```
 
-##  Uso
+## Uso
 
 1. **Interfaz de Línea de Comandos**:
+
    ```bash
    python src/main.py
    ```
@@ -109,15 +133,17 @@ src/
    - Configurar procesamiento LLM
    - Gestionar cache OCR
 
-##  Arquitectura
+## Arquitectura
 
 El proyecto sigue una arquitectura hexagonal (ports & adapters) que:
 
 1. **Aísla la Lógica de Negocio**
+
    - El dominio es independiente de implementaciones externas
    - Interfaces claras mediante puertos
 
 2. **Facilita la Extensibilidad**
+
    - Nuevos adaptadores sin modificar el dominio
    - Fácil adición de nuevas interfaces
 
@@ -125,9 +151,10 @@ El proyecto sigue una arquitectura hexagonal (ports & adapters) que:
    - Separación clara de responsabilidades
    - Documentación exhaustiva
 
-##  Documentación
+## Documentación
 
 Para más detalles sobre:
+
 - Arquitectura y diseño
 - Guías de desarrollo
 - API Reference
@@ -135,7 +162,7 @@ Para más detalles sobre:
 
 Consulta la [Wiki del proyecto](https://github.com/ROD-LAR-GILLES/OCR-PYMUPDF/wiki)
 
-##  Contribuir
+## Contribuir
 
 1. Fork del repositorio
 2. Crear rama feature: `git checkout -b feature/NuevaCaracteristica`
@@ -143,7 +170,6 @@ Consulta la [Wiki del proyecto](https://github.com/ROD-LAR-GILLES/OCR-PYMUPDF/wi
 4. Push a la rama: `git push origin feature/NuevaCaracteristica`
 5. Crear Pull Request
 
-##  Licencia
+## Licencia
 
 Este proyecto está licenciado bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
