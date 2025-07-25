@@ -64,13 +64,9 @@ def extract_markdown(pdf_path: Path) -> str:
     # Fase final - Refinamiento LLM
     logger.info("Iniciando refinamiento con LLM")
     try:
-        if os.getenv("OPENAI_API_KEY") and state.LLM_MODE != "off":
-            if state.LLM_MODE == "ft" and os.getenv("OPENAI_FT_MODEL"):
-                logger.info("Aplicando modelo fine-tuned para refinamiento...")
-                md_out = llm_refiner.prompt_refine(md_out)
-            elif state.LLM_MODE in {"prompt", "auto"}:
-                logger.info("Aplicando refinamiento LLM con modelo base...")
-                md_out = llm_refiner.prompt_refine(md_out)
+        if state.LLM_MODE != "off":
+            logger.info(f"Aplicando refinamiento LLM con modo: {state.LLM_MODE}")
+            md_out = llm_refiner.prompt_refine(md_out)
             logger.info("Refinamiento LLM completado exitosamente")
     except Exception as exc:
         logger.warning(f"El refinamiento LLM fue omitido: {exc}")

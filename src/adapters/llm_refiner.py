@@ -3,9 +3,11 @@ import re
 from typing import List, Dict, Any
 import time
 from domain.ports.llm_provider import LLMProvider
-from config.api_settings import load_api_settings
+from adapters.providers.llm_factory import LLMProviderFactory
 from infrastructure.logging_setup import logger
+import config.state as state
 
+# Patrones comunes de corrección OCR
 OCR_PATTERNS = {
     r"[0Oo]": "O",
     r"[1Il]": "l",
@@ -15,11 +17,13 @@ OCR_PATTERNS = {
 }
 
 def _correct_ocr_errors(text: str) -> str:
+    """Corrige errores comunes de OCR usando patrones de sustitución."""
     for pattern, replacement in OCR_PATTERNS.items():
         text = re.sub(pattern, replacement, text)
     return text
 
 def _detect_document_structure(text: str) -> Dict[str, List[str]]:
+    """Detecta elementos estructurales en el documento para análisis."""
     structure = {"headers": [], "sections": [], "lists": [], "tables": []}
     structure["headers"]  = re.findall(r"^[A-ZÁÉÍÓÚÑ\s]{10,}$", text, re.MULTILINE)
     structure["sections"] = re.findall(r"^\d+\.\s+[A-ZÁÉÍÓÚÑ][^.]+", text, re.MULTILINE)
@@ -28,21 +32,21 @@ def _detect_document_structure(text: str) -> Dict[str, List[str]]:
 
 
 class LLMRefiner:
-    """Refines OCR text using configurable LLM providers."""
+    """Refina texto OCR usando proveedores LLM configurables."""
 
-    def __init__(self, provider: LLMProvider = None) -> None:
-        try:
-            self.api_config = load_api_settings()
+    def __init__(self, provider_type: str = None) -> None:
+        """
+        Inicializa el refinador con un proveedor LLM.
+        
+        Args:
+            provider_type: Tipo de proveedor a usar ('openai', 'gemini', o None para automático)
+        """
+        # Determinar el tipo de proveedor automáticamente basado en la configuración
+        if provider_type is None:
+            provider_type = state.LLM_PROVIDER if hasattr(state, 'LLM_PROVIDER') else None
             
-            if provider is None:
-                from adapters.providers.openai_provider import OpenAIProvider
-                provider = OpenAIProvider()
-            
-            self.provider = provider
-            self.provider.initialize(self.api_config["openai"])
-        except Exception as e:
-            logger.error(f"Error initializing LLM provider: {e}")
-            self.provider = None
+        # Crear el proveedor usando la fábrica
+        self.provider = LLMProviderFactory.create_provider(provider_type)
             
     def _safe_generate(self, prompt: str, system_prompt: str = None) -> str:
         """
@@ -79,30 +83,48 @@ class LLMRefiner:
 
     # ───────────────────── Prompt-based pipeline ─────────────────────
     def prompt_refine(self, raw: str) -> str:
-        """Prompt-based refinement pipeline."""
+        """
+        Refinamiento basado en prompts: aplica correcciones y mejoras al texto OCR.
+        
+        Proceso:
+        1. Corrige errores OCR comunes
+        2. Detecta estructura del documento
+        3. Usa el LLM para refinar el texto
+        
+        Args:
+            raw: Texto OCR original
+            
+        Returns:
+            Texto refinado o el original si falla el proceso
+        """
         if not self.provider:
-            logger.warning("LLM provider not available → returning raw text")
+            logger.warning("Proveedor LLM no disponible → devolviendo texto original")
             return raw
 
         try:
+            # 1. Corregir errores básicos de OCR
             cleaned = _correct_ocr_errors(raw)
+            
+            # 2. Detectar estructura del documento
             structure = _detect_document_structure(cleaned)
-
-            # Initial document analysis
-            analysis_prompt = ("You are a legal document analysis expert. "
-                           "Analyze the text and return its structure, references, and OCR errors.")
-            analysis = self._safe_generate(cleaned, analysis_prompt)
-
-            # Final refinement with context
+            
+            # 3. Prompt unificado para refinamiento
             system_prompt = (
-                "You are an advanced legal document and OCR processing expert.\n"
-                f"- Headers detected: {len(structure['headers'])}\n"
-                f"- Numbered sections: {len(structure['sections'])}\n"
-                f"- List items: {len(structure['lists'])}\n\n"
-                f"Previous analysis:\n{analysis}"
+                "Eres un experto en documentos legales y procesamiento de OCR. "
+                "Tu tarea es mejorar el texto OCR corrigiendo errores y mejorando el formato. "
+                f"- Encabezados detectados: {len(structure['headers'])}\n"
+                f"- Secciones numeradas: {len(structure['sections'])}\n"
+                f"- Elementos de lista: {len(structure['lists'])}\n\n"
+                "Mantén todas las referencias legales, números y términos técnicos exactos. "
+                "Preserva el formato Markdown existente."
             )
             
+            # 4. Generar refinamiento
             return self._safe_generate(cleaned, system_prompt) or raw
+            
+        except Exception as e:
+            logger.error(f"Error en refinamiento: {e}")
+            return raw
 
         except Exception as e:
             logger.exception(f"Error in refinement pipeline: {e}")

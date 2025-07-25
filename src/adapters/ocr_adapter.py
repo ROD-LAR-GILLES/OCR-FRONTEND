@@ -156,14 +156,11 @@ def perform_ocr_on_page(page: fitz.Page) -> str:
 
     # 10) Refinamiento LLM opcional
     try:
-        use_llm = os.getenv("OPENAI_API_KEY") and state.LLM_MODE in {"prompt", "auto", "ft"}
-        if use_llm:
-            logging.info(f"[LLM] Page-level refinement via OpenAI · mode={state.LLM_MODE}")
+        if state.LLM_MODE not in {"off", None}:
+            logging.info(f"[LLM] Page-level refinement · mode={state.LLM_MODE}")
             segmented = llm_refiner.prompt_refine(segmented)
         else:
-            logging.debug(
-                f"[LLM] Skipped page-level · mode={state.LLM_MODE} · key={'set' if os.getenv('OPENAI_API_KEY') else 'unset'}"
-            )
+            logging.debug(f"[LLM] Skipped page-level refinement · mode={state.LLM_MODE}")
     except Exception as exc:
         logging.warning(f"[LLM] Page-level refinement error → {exc}")
     return detect_structured_headings(segmented)
