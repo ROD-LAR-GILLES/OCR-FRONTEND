@@ -42,14 +42,17 @@ WORKDIR /app
 # Crear estructura de directorios necesaria y configurar volúmenes
 RUN mkdir -p /app/data/corrections \
             /app/pdfs \
-            /app/result
+            /app/result \
+            /app/logs \
+            /app/cache \
+            /app/output
 
 COPY --from=builder /install /usr/local
 
 COPY src/ src/
 COPY data/ data/
 COPY pdfs/ pdfs/
-COPY resultado/ resultado/
+COPY result/ result/
 
 # Asegurar permisos de escritura y ownership
 RUN chown -R 1000:1000 /app/data && \

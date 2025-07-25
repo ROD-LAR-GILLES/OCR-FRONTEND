@@ -7,6 +7,9 @@ services:
       - ./result:/app/result
       - ./src:/app/src
       - ./data:/app/data
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./output:/app/output
     stdin_open: true
     tty: true
     env_file:
