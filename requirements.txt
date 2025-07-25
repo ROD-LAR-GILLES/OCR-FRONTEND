@@ -1,0 +1,22 @@
+# ───── LLM Providers & Environment ─────
+python-dotenv>=1.0.0     # Robust environment variable management
+openai>=1.0.0           # OpenAI official SDK
+google-generativeai>=0.3.0  # Google AI official SDK for Gemini
+
+# ───── OCR y Preprocesamiento ─────
+opencv-python>=4.8.1.78  # Versión estable con parches de seguridad
+Pillow>=10.0.0          # Versión con correcciones de seguridad
+pytesseract>=0.3.10
+unidecode>=1.3.8
+numpy>=1.24.3
+
+# ───── PDF Parsing ─────
+PyMuPDF>=1.23.0         # Última versión estable con mejoras de rendimiento
+pypdf>=3.16.0           # Versión actualizada sin warnings de ARC4
+
+# ───── NLP Básico ─────
+symspellpy>=6.7.0       # Corrección ortográfica
+
+# ───── Logging y Utilidades ─────
+loguru==0.7.3
+markdown2==2.4.10

@@ -1,0 +1,18 @@
+services:
+  ocr-pymupdf:
+    build: .
+    container_name: ocr-pymupdf
+    volumes:
+      - ./pdfs:/app/pdfs
+      - ./resultado:/app/resultado
+      - ./src:/app/src
+      - ./data:/app/data
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONPATH=/app/src
+      - OPENAI_API_KEY
+      - OPENAI_ORG_ID
+      - OPENAI_PROMPT_MODEL
+      - OPENAI_FT_MODEL
+      - OCR_DPI=300
