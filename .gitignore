@@ -37,4 +37,5 @@ pdfs/
 *.egg-info/
 dist/
 build/RULES.md
+.github
 investigacion.txt
