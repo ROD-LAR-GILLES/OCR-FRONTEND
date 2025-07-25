@@ -40,12 +40,13 @@ ENV PYTHONPATH=/app/src
 WORKDIR /app
 
 # Crear estructura de directorios necesaria y configurar volúmenes
-RUN mkdir -p /app/data/corrections \
-            /app/pdfs \
-            /app/result \
-            /app/logs \
-            /app/cache \
-            /app/output
+RUN mkdir -p data/corrections \
+            pdfs \
+            result \
+            logs \
+            cache \
+            output \
+            static
 
 COPY --from=builder /install /usr/local
 

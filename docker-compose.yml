@@ -3,13 +3,14 @@ services:
     build: .
     container_name: ocr-pymupdf
     volumes:
-      - ./pdfs:/app/pdfs
-      - ./result:/app/result
-      - ./src:/app/src
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./cache:/app/cache
-      - ./output:/app/output
+      - ./pdfs:/pdfs
+      - ./result:/result
+      - ./src:/src
+      - ./data:/data
+      - ./logs:/logs
+      - ./cache:/cache
+      - ./output:/output
+      - ./static:/static
     stdin_open: true
     tty: true
     env_file:
