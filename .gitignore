@@ -6,6 +6,19 @@
 __pycache__/
 *.py[cod]
 *.pyo
+*.so
+.Python
+.pytest_cache/
+pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.egg
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Archivos de logs
 *.log
@@ -14,6 +27,11 @@ logs/
 # Archivos de configuración de IDE
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
+.spyderproject
+.spyproject
+.ropeproject
 
 # Archivos de sistema
 .DS_Store
@@ -30,11 +48,12 @@ docker-compose.override.yml
 *.old
 
 # Archivos de resultados o datos procesados
-resultado/
+result/
 pdfs/
+config/
+data/
 
 # Archivos de dependencias locales
 *.egg-info/
 dist/
-build/RULES.md
-investigacion.txt
+.github

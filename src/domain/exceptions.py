@@ -1,13 +1,19 @@
-"""Excepciones del dominio para casos de uso."""
+"""
+Excepciones específicas del dominio.
 
-class DocumentError(Exception):
-    """Error al procesar un documento."""
-    pass
+NOTA: Este módulo está obsoleto y se mantiene por compatibilidad. 
+Usar shared.utils.error_handling para manejar errores.
 
-class StorageError(Exception):
-    """Error al almacenar datos."""
-    pass
+Este módulo define excepciones personalizadas que representan errores
+específicos del dominio, permitiendo un manejo más preciso de los
+diferentes tipos de errores que pueden ocurrir durante la ejecución.
+"""
 
-class LLMError(Exception):
-    """Error en el procesamiento con LLM."""
-    pass
+from shared.utils.error_handling import (
+    DocumentError, StorageError, LLMError,
+    OCRError, ValidationError, ConfigurationError,
+    NetworkError, FileError
+)
+
+# Las clases importadas de shared.utils.error_handling proporcionan
+# implementaciones mejoradas con contexto y severidad

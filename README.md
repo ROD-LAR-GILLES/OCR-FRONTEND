@@ -1,149 +1,238 @@
-# OCR-PYMUPDF
+# OCR-FRONTEND
 
-Sistema de OCR y procesamiento de documentos PDF basado en arquitectura hexagonal.
+Sistema OCR avanzado con arquitectura hexagonal para procesamiento de documentos PDF a Markdown.
 
-##  Características Principales
+## Arquitectura
 
-- Extracción de texto de PDFs digitales y escaneados
-- Detección y extracción de tablas
-- Refinamiento de texto usando LLMs (OpenAI, Google Gemini)
-- Caché de resultados OCR para optimización
-- Sistema de corrección manual de palabras
-- Soporte multilenguaje
+El proyecto implementa una **arquitectura hexagonal (ports & adapters)** limpia con las siguientes capas:
 
-##  Estructura del Proyecto
+- **Dominio**: Lógica de negocio pura
+- **Aplicación**: Casos de uso y servicios
+- **Adaptadores**: Integraciones externas
+- **Infraestructura**: Implementaciones técnicas
+- **Interfaces**: CLI
+
+### Estructura del Proyecto
 
 ```
 src/
-├── domain/             # Núcleo de la aplicación
-│   ├── entities/       # Entidades principales
-│   ├── value_objects/  # Objetos de valor inmutables
-│   ├── ports/         # Interfaces para servicios externos
-│   ├── use_cases/     # Lógica de negocio
-│   └── dtos/          # Objetos de transferencia de datos
+├── application/           # Capa de aplicación
+│   ├── composition_root.py   # Inyección de dependencias
+│   ├── services/            # Servicios de aplicación
+│   │   └── configuration_service.py
+│   └── use_cases/           # Casos de uso del dominio
+│       ├── pdf_to_markdown.py
+│       └── validate_pdf.py
 │
-├── adapters/           # Implementaciones de puertos
-│   ├── ocr_adapter.py      # Adaptador OCR (Tesseract)
-│   ├── pymupdf_adapter.py  # Adaptador PDF
-│   ├── llm_refiner.py     # Refinamiento con LLMs
-│   └── providers/         # Proveedores LLM (OpenAI, Gemini)
+├── domain/                # Capa de dominio (núcleo del negocio)
+│   ├── entities/          # Entidades del dominio
+│   ├── ports/             # Interfaces (puertos)
+│   ├── use_cases/         # Casos de uso principales
+│   └── value_objects/     # Objetos de valor
 │
-├── infrastructure/     # Servicios técnicos
-│   ├── file_storage.py    # Almacenamiento de archivos
-│   ├── logging_setup.py   # Sistema de logs
-│   └── ocr_cache.py      # Caché de resultados
+├── infrastructure/       # Capa de infraestructura
+│   ├── document_adapter.py
+│   ├── storage_adapter.py
+│   ├── logging_setup.py
+│   └── ocr_cache.py
 │
-├── interfaces/         # Puntos de entrada
-│   ├── cli_menu.py        # Interfaz de línea de comandos
-│   └── config_menu.py     # Menú de configuración
+├── adapters/             # Adaptadores externos
+│   ├── pymupdf_adapter.py
+│   ├── llm_refiner.py
+│   └── ocr/
 │
-└── config/            # Configuración del sistema
-    └── settings.py        # Ajustes globales
+├── interfaces/           # Capa de interfaces (CLI)
+│   └── cli/              # Interfaz de línea de comandos
+│       ├── menu.py       # Menú principal
+│       ├── pdf_management.py  # Gestión consolidada de PDFs
+│       ├── processing.py # Procesamiento de documentos
+│       └── utils.py      # Utilidades consolidadas
+│
+└── shared/               # Componentes compartidos
+    ├── constants/        # Constantes centralizadas
+    │   ├── config.py     # Configuración unificada
+    │   └── directories.py # Directorios centralizados
+    └── utils/            # Utilidades compartidas
+        └── error_handling.py # Sistema de errores centralizado
 ```
 
-##  Casos de Uso Principales
+### Principios Arquitectónicos
 
-1. **Procesamiento de PDFs Digitales**
-   - Extracción directa de texto
-   - Preservación de formato y estructura
+#### 1. Arquitectura Hexagonal (Ports & Adapters)
 
-2. **Procesamiento de PDFs Escaneados**
-   - OCR con Tesseract
-   - Optimización mediante caché
-   - Corrección manual de palabras
+- **Dominio**: Lógica de negocio pura, sin dependencias externas
+- **Aplicación**: Casos de uso y servicios de aplicación
+- **Infraestructura**: Implementaciones técnicas
+- **Interfaces**: CLI
 
-3. **Extracción de Tablas**
-   - Detección automática
-   - Conversión a formato estructurado
+#### 2. Inyección de Dependencias
 
-4. **Refinamiento de Texto**
-   - Mejora mediante LLMs
-   - Múltiples proveedores disponibles
-   - Control de costos y tokens
+- `DependencyContainer` centraliza la creación de objetos
+- Composición root en `app.py`
+- Interfaces abstraen implementaciones
 
-##  Tecnologías Utilizadas
+#### 3. Configuración Centralizada
 
-- **Python 3.11+**
-- **PyMuPDF**: Procesamiento de PDFs
-- **Tesseract**: Motor OCR
-- **OpenAI/Gemini**: Refinamiento de texto
-- **FAISS/Chroma**: Vectorización y búsqueda
-- **SQLite**: Almacenamiento local
+- `shared.constants.config` unifica toda la configuración
+- Sistema de configuración inmutable con dataclasses
+- Validación de configuración integrada
 
-##  Requisitos
+## Características
 
-1. Python 3.11 o superior
-2. Tesseract OCR instalado
-3. Variables de entorno configuradas
-4. Dependencias Python instaladas
+### Procesamiento Inteligente
 
-##  Configuración
+- **OCR Selectivo**: Aplica OCR solo donde es necesario
+- **Extracción de Tablas**: Detecta y preserva estructura tabular
+- **Refinamiento LLM**: Mejora el texto con IA (OpenAI/Gemini)
+- **Detección de Idioma**: Soporte multilenguaje automático
 
-1. Clonar el repositorio:
-   ```bash
-   git clone https://github.com/ROD-LAR-GILLES/OCR-PYMUPDF.git
-   cd OCR-PYMUPDF
-   ```
+### Interfaces Múltiples
 
-2. Instalar dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- **CLI Interactivo**: Menú intuitivo para uso local
+- **Procesamiento Batch**: Múltiples documentos
 
-3. Configurar variables de entorno:
-   ```bash
-   cp .env.example .env
-   # Editar .env con tus claves API
-   ```
+### Características Técnicas
 
-##  Uso
+- **Caché Inteligente**: Evita reprocesamiento con hashing seguro BLAKE2b
+- **Logging Avanzado**: Trazabilidad completa y detallada
+- **Configuración Centralizada**: Gestión unificada y validada
+- **Manejo de Errores Robusto**: Sistema centralizado con tipos y severidad
+- **Seguridad Mejorada**: Configuración segura (127.0.0.1) y permisos adecuados
 
-1. **Interfaz de Línea de Comandos**:
-   ```bash
-   python src/main.py
-   ```
+### Patrones de Diseño Utilizados
 
-2. **Opciones Disponibles**:
-   - Listar PDFs disponibles
-   - Convertir PDF a Markdown
-   - Configurar procesamiento LLM
-   - Gestionar cache OCR
+#### Composition Root
 
-##  Arquitectura
+```python
+# app.py
+container = DependencyContainer()
+use_case = container.get_pdf_to_markdown_use_case()
+```
 
-El proyecto sigue una arquitectura hexagonal (ports & adapters) que:
+#### Repository Pattern (Ports)
 
-1. **Aísla la Lógica de Negocio**
-   - El dominio es independiente de implementaciones externas
-   - Interfaces claras mediante puertos
+```python
+# domain/ports/document_port.py
+class DocumentPort(ABC):
+    @abstractmethod
+    def extract_content(self, pdf_path: Path) -> str:
+        pass
+```
 
-2. **Facilita la Extensibilidad**
-   - Nuevos adaptadores sin modificar el dominio
-   - Fácil adición de nuevas interfaces
+#### Service Layer
 
-3. **Asegura la Mantenibilidad**
-   - Separación clara de responsabilidades
-   - Documentación exhaustiva
+```python
+# application/services/configuration_service.py
+class ConfigurationService:
+    def update_llm_provider(self, provider: str, settings: Dict[str, Any]):
+        # Lógica de configuración
+```
 
-##  Documentación
+### Beneficios de la Arquitectura
 
-Para más detalles sobre:
-- Arquitectura y diseño
-- Guías de desarrollo
-- API Reference
-- Ejemplos de uso
+#### Problemas Resueltos
 
-Consulta la [Wiki del proyecto](https://github.com/ROD-LAR-GILLES/OCR-PYMUPDF/wiki)
+1. **Duplicación de Código**: Eliminada mediante centralización
+2. **Configuración Fragmentada**: Unificada en un solo lugar
+3. **Manejo de Errores Inconsistente**: Estandarizado
+4. **Dependencias Circulares**: Resueltas con inyección de dependencias
+5. **Archivos Excesivamente Pequeños**: Consolidados
 
-##  Contribuir
+#### Mejoras Implementadas
 
-1. Fork del repositorio
-2. Crear rama feature: `git checkout -b feature/NuevaCaracteristica`
-3. Commit cambios: `git commit -am 'Añadir nueva característica'`
-4. Push a la rama: `git push origin feature/NuevaCaracteristica`
-5. Crear Pull Request
+1. **Testabilidad**: Inyección de dependencias facilita testing
+2. **Mantenibilidad**: Código organizado y responsabilidades claras
+3. **Extensibilidad**: Nuevas características fáciles de agregar
+4. **Robustez**: Manejo de errores mejorado
+5. **Configurabilidad**: Sistema de configuración flexible
 
-##  Licencia
+## Desarrollo
 
-Este proyecto está licenciado bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
+### Agregar Nueva Funcionalidad
 
+1. Definir caso de uso en `application/use_cases/`
+2. Crear puerto si necesita infraestructura
+3. Implementar adaptador en `adapters/` o `infrastructure/`
+4. Registrar en `DependencyContainer`
+5. Exponer en interfaz apropiada (`cli/`)
+
+### Configurar Nueva Opción
+
+1. Agregar al dataclass apropiado en `shared/constants/config.py`
+2. Actualizar `ConfigurationService` si es necesario
+3. Agregar validación en `AppConfig.validate_configuration()`
+
+## Uso
+
+### Docker (Recomendado)
+
+```bash
+# Construir e iniciar el contenedor
+docker-compose up --build -d
+
+# Acceder al CLI interactivo
+docker exec -it ocr-pymupdf python app.py
+```
+
+### Local
+
+```bash
+# CLI interactivo
+python app.py
+```
+
+## Funcionalidades
+
+### CLI Interactivo
+
+1. **Convertir PDF a Markdown** - Con validación automática integrada
+2. **Configuración** - Configurar proveedores LLM y parámetros
+3. **Estadísticas de caché** - Ver información del caché de procesamiento
+4. **Salir** - Terminar la aplicación
+
+## Configuración
+
+### Variables de Entorno (.env)
+
+```bash
+# LLM Provider
+LLM_PROVIDER=openai
+OPENAI_API_KEY=tu_api_key_aqui
+GEMINI_API_KEY=tu_api_key_gemini
+
+# Configuración OCR
+TESSERACT_CMD=/usr/bin/tesseract
+```
+
+## Estado del Proyecto
+
+### Completado
+
+- [x] Configuración centralizada
+- [x] Directorios centralizados
+- [x] Inyección de dependencias
+- [x] Consolidación de archivos CLI
+- [x] Sistema de errores unificado
+- [x] Eliminación de código duplicado
+- [x] Arquitectura hexagonal básica
+- [x] Limpieza de funciones duplicadas
+- [x] Eliminación de imports no utilizados
+
+### En Progreso
+
+- [ ] Testing exhaustivo de integración
+- [ ] Documentación de API
+- [ ] Optimización de performance
+
+### Pendiente (Opcional)
+
+- [ ] Implementar caché distribuido
+- [ ] Métricas de monitoreo
+- [ ] Configuración por variables de entorno
+- [ ] Docker optimizado
+
+## Contribución
+
+Esta refactorización transforma OCR-FRONTEND de un sistema con múltiples problemas arquitectónicos a una aplicación bien estructurada, mantenible y extensible que sigue las mejores prácticas de desarrollo de software.
+
+La nueva arquitectura facilita el desarrollo futuro, mejora la testabilidad, y proporciona una base sólida para el crecimiento del sistema.

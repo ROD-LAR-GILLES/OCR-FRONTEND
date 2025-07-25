@@ -1,5 +1,5 @@
 # ------------------ build stage ------------------
-FROM python:3.11-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN pip install --upgrade pip && \
     pip install --prefix=/install -r requirements.txt
 
 # ------------------ runtime stage ------------------
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -35,24 +35,33 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app:/app/src:/app/config
 
 WORKDIR /app
 
 # Crear estructura de directorios necesaria y configurar volúmenes
-RUN mkdir -p /app/data/corrections \
-            /app/pdfs \
-            /app/resultado
+RUN mkdir -p data/corrections \
+            pdfs \
+            result \
+            logs
 
 COPY --from=builder /install /usr/local
 
+COPY app.py .
 COPY src/ src/
+COPY config/ config/
 COPY data/ data/
 COPY pdfs/ pdfs/
-COPY resultado/ resultado/
+COPY result/ result/
+
+# Crear usuario no-root
+RUN groupadd -r ocruser && useradd -r -g ocruser -d /app ocruser
 
 # Asegurar permisos de escritura y ownership
-RUN chown -R 1000:1000 /app/data && \
-    chmod -R 777 /app/data
+RUN chown -R ocruser:ocruser /app/data /app/pdfs /app/result /app/logs && \
+    chmod -R 755 /app/data /app/pdfs /app/result /app/logs
 
-CMD ["python", "-m", "src.main"]
+# Cambiar al usuario no-root
+USER ocruser
+
+CMD ["python", "app.py", "--mode", "cli"]

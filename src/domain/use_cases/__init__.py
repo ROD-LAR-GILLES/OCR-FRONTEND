@@ -6,5 +6,9 @@ Sigue los principios de Clean Architecture, donde cada caso de uso representa un
 """
 
 from .pdf_to_markdown import PDFToMarkdownUseCase
+from .validate_pdf import ValidatePDFUseCase
 
-__all__ = ['PDFToMarkdownUseCase']
+__all__ = [
+    'PDFToMarkdownUseCase',
+    'ValidatePDFUseCase',
+]
