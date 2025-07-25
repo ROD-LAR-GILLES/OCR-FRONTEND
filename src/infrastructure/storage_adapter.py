@@ -5,14 +5,16 @@ Este adaptador proporciona implementaciones concretas para las operaciones
 de almacenamiento definidas en el puerto StoragePort del dominio, utilizando
 el sistema de archivos local para persistir los datos.
 """
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from domain.ports.storage_port import StoragePort
-from loguru import logger
 from config import config
 
+logger = logging.getLogger(__name__)
+
 # Directorio para resultados procesados
-RESULT_DIR = config.paths["result_dir"]
+RESULT_DIR = Path("./result")
 RESULT_DIR.mkdir(exist_ok=True)
 
 
@@ -23,6 +25,33 @@ class StorageAdapter(StoragePort):
     Esta clase proporciona una implementación concreta de las operaciones
     de almacenamiento utilizando el sistema de archivos local.
     """
+
+    def ensure_directory(self, directory: Path) -> None:
+        """
+        Asegura que un directorio exista, creándolo si es necesario.
+
+        Args:
+            directory: Ruta del directorio a asegurar
+        """
+        directory.mkdir(parents=True, exist_ok=True)
+
+    def read_file(self, filepath: Path) -> Optional[str]:
+        """
+        Lee el contenido de un archivo si existe.
+
+        Args:
+            filepath: Ruta del archivo a leer
+
+        Returns:
+            El contenido del archivo o None si no existe
+        """
+        try:
+            if filepath.exists():
+                return filepath.read_text(encoding="utf-8")
+            return None
+        except Exception as e:
+            logger.error(f"Error leyendo archivo {filepath}: {e}")
+            return None
 
     def save_markdown(self, filename: str, content: str) -> Path:
         """
@@ -35,6 +64,7 @@ class StorageAdapter(StoragePort):
         Returns:
             Path: Ruta del archivo guardado
         """
+        self.ensure_directory(RESULT_DIR)
         filepath = RESULT_DIR / f"{filename}.md"
         filepath.write_text(content, encoding="utf-8")
         logger.info(f"Markdown guardado en {filepath}")

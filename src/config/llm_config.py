@@ -1,23 +1,25 @@
 """LLM configuration state management."""
 from typing import Optional, Dict, Any
 import json
+import logging
 from pathlib import Path
-from infrastructure.logging_setup import logger
 
 CONFIG_FILE = Path("config/llm_config.json")
+logger = logging.getLogger(__name__)
+
 
 class LLMConfig:
     """Manages LLM configuration state."""
-    
+
     DEFAULT_CONFIG = {
         "provider": None,  # None means no LLM processing
         "settings": {}
     }
-    
+
     @classmethod
     def save_config(cls, config: Dict[str, Any]) -> None:
         """Save LLM configuration to file.
-        
+
         Args:
             config: Configuration dictionary to save
         """
@@ -31,7 +33,7 @@ class LLMConfig:
     @classmethod
     def load_config(cls) -> Dict[str, Any]:
         """Load LLM configuration from file.
-        
+
         Returns:
             Dictionary with current LLM configuration
         """
@@ -42,20 +44,20 @@ class LLMConfig:
         except Exception as e:
             logger.error(f"Error loading LLM config: {e}")
         return cls.DEFAULT_CONFIG.copy()
-    
+
     @classmethod
     def get_current_provider(cls) -> Optional[str]:
         """Get currently selected LLM provider.
-        
+
         Returns:
             Provider name or None if no LLM processing is selected
         """
         return cls.load_config().get("provider")
-    
+
     @classmethod
     def set_provider(cls, provider: Optional[str], settings: Dict[str, Any] = None) -> None:
         """Set LLM provider and its settings.
-        
+
         Args:
             provider: Provider name or None to disable LLM processing
             settings: Optional provider-specific settings
