@@ -55,9 +55,13 @@ def _convert_pdf(pdf_path: Path) -> None:
     Args:
         pdf_path: Ruta al archivo PDF a convertir
     """
+    print(f"\nIniciando procesamiento de: {pdf_path.name}")
+    print("-" * 60)
+
     logger.info(f"Convirtiendo a Markdown: {pdf_path}")
     try:
-        # Validar el PDF primero
+        # Paso 1: Validar el PDF
+        print("Paso 1/4: Validando PDF...")
         validate_pdf_use_case = ValidatePDFUseCase(
             document_port=None)  # TODO: Implementar DocumentPort
         validation_result = validate_pdf_use_case.execute(pdf_path)
@@ -66,43 +70,76 @@ def _convert_pdf(pdf_path: Path) -> None:
             print(f"[ERROR] PDF inválido: {validation_result['message']}")
             return
 
-        print(f"[INFO] {validation_result['message']}")
-        print(f"[INFO] Páginas totales: {validation_result['total_pages']}")
-        print(
-            f"[INFO] Páginas digitales: {validation_result['digital_pages']}")
-        print(
-            f"[INFO] Páginas escaneadas: {validation_result['scanned_pages']}")
+        print(f"[OK] {validation_result['message']}")
+        print(f"Páginas totales: {validation_result['total_pages']}")
+        print(f"Páginas digitales: {validation_result['digital_pages']}")
+        print(f"Páginas escaneadas: {validation_result['scanned_pages']}")
 
-        # Crear y ejecutar el caso de uso
+        # Paso 2: Preparar procesamiento
+        print("\nPaso 2/4: Preparando procesamiento...")
         pdf_to_markdown_use_case = PDFToMarkdownUseCase(
             document_port=None,  # TODO: Implementar DocumentPort
             storage_port=storage_adapter,
             llm_port=None  # TODO: Implementar LLMPort
         )
+        print("[OK] Casos de uso inicializados")
 
-        # Temporalmente, hasta que se completen los puertos
-        # Extraer contenido markdown del PDF
+        # Paso 3: Extraer contenido
+        print("\nPaso 3/4: Extrayendo contenido del PDF...")
+        print("   - Analizando estructura del documento...")
         markdown_content = extract_markdown(pdf_path)
 
-        # Guardar el resultado
+        if len(markdown_content) > 1000:
+            preview = markdown_content[:200] + "..."
+        else:
+            preview = markdown_content[:200]
+
+        print(f"[OK] Contenido extraído ({len(markdown_content)} caracteres)")
+        print(f"Vista previa: {preview}")
+
+        # Paso 4: Guardar resultado
+        print("\nPaso 4/4: Guardando resultado...")
         output_path = storage_adapter.save_markdown(
             pdf_path.stem, markdown_content)
-        print(f"[OK] Markdown generado: {output_path}")
+
+        print("-" * 60)
+        print(f"[SUCCESS] Procesamiento completado exitosamente!")
+        print(f"Archivo generado: {output_path}")
+        print(f"Tamaño del contenido: {len(markdown_content)} caracteres")
 
     except Exception as e:
         logger.exception("Error en la conversión de PDF")
-        print(f"[ERROR] Fallo en la conversión: {e}")
+        print(f"\n[ERROR] Fallo en la conversión: {e}")
+        print("Revisa los logs para más detalles")
 
 
 def _show_cache_stats() -> None:
     """Muestra estadísticas de la caché OCR."""
-    stats = ocr_cache.get_stats()
-    print("\n=== Estadísticas de Caché OCR ===")
-    print(f"Total de entradas: {stats.get('total_entries', 0)}")
-    print(
-        f"Tamaño aproximado: {stats.get('total_text_size_bytes', 0) / 1024:.2f} KB")
-    print(f"Última actualización: {stats.get('last_update', 'Nunca')}")
-    print(f"Caché en memoria: {stats.get('memory_cache_size', 0)} entradas")
+    print("\nObteniendo estadísticas de caché...")
+    try:
+        stats = ocr_cache.get_stats()
+        print("\n=== Estadísticas de Caché OCR ===")
+        print("-" * 40)
+        print(f"Total de entradas: {stats.get('total_entries', 0)}")
+
+        size_kb = stats.get('total_text_size_bytes', 0) / 1024
+        print(f"Tamaño aproximado: {size_kb:.2f} KB")
+
+        last_update = stats.get('last_update', 'Nunca')
+        print(f"Última actualización: {last_update}")
+
+        memory_size = stats.get('memory_cache_size', 0)
+        print(f"Caché en memoria: {memory_size} entradas")
+
+        if stats.get('total_entries', 0) > 0:
+            print("[INFO] La caché está optimizando el rendimiento del OCR")
+        else:
+            print("[INFO] La caché está vacía - se poblará con el uso")
+
+    except Exception as e:
+        logger.exception("Error obteniendo estadísticas de caché")
+        print(f"[ERROR] Error al obtener estadísticas: {e}")
+        print("Revisa los logs para más detalles")
 
 
 # ───────────────────────── Gestión de PDFs ──────────────────────────
@@ -119,17 +156,32 @@ def select_pdf() -> Optional[str]:
     """Muestra un menú de selección de PDF."""
     files = list_pdfs()
     if not files:
-        print("[INFO] No se encontraron PDFs en el directorio ./pdfs")
+        print("\n[INFO] No se encontraron PDFs en el directorio ./pdfs")
+        print("[TIP] Coloca archivos PDF en el directorio 'pdfs' para procesarlos")
         return None
 
-    print("\nAvailable PDFs:")
+    print(
+        f"\nPDFs disponibles ({len(files)} archivo{'s' if len(files) != 1 else ''}):")
+    print("-" * 60)
     for i, pdf in enumerate(files, 1):
-        print(f"{i}. {pdf}")
+        # Obtener información adicional del archivo
+        pdf_path = PDF_DIR / pdf
+        try:
+            size_mb = pdf_path.stat().st_size / (1024 * 1024)
+            size_str = f"({size_mb:.1f} MB)"
+        except:
+            size_str = "(tamaño desconocido)"
+
+        print(f"  {i:2d}. {pdf} {size_str}")
+
+    print("-" * 60)
 
     try:
-        sel = input("\nSeleccione un número: ").strip()
+        sel = input("Seleccione un número: ").strip()
         if sel.isdigit() and 1 <= int(sel) <= len(files):
-            return files[int(sel) - 1]
+            selected_file = files[int(sel) - 1]
+            print(f"[OK] Seleccionado: {selected_file}")
+            return selected_file
         print("[ERROR] Selección inválida")
         return None
     except (ValueError, IndexError):
@@ -154,39 +206,69 @@ def main_loop() -> None:
 
         match input("\nSeleccione una opción (1-6): ").strip():
             case "1":
+                print("\nEscaneando directorio de PDFs...")
                 files = list_pdfs()
                 if files:
-                    print("\nPDFs encontrados:")
-                    for pdf in files:
-                        print(f" - {pdf}")
+                    print(
+                        f"\nPDFs encontrados ({len(files)} archivo{'s' if len(files) != 1 else ''}):")
+                    print("-" * 50)
+                    for i, pdf in enumerate(files, 1):
+                        # Obtener tamaño del archivo
+                        pdf_path = PDF_DIR / pdf
+                        try:
+                            size_mb = pdf_path.stat().st_size / (1024 * 1024)
+                            size_str = f"({size_mb:.1f} MB)"
+                        except:
+                            size_str = "(tamaño desconocido)"
+
+                        print(f"  {i:2d}. {pdf} {size_str}")
+                    print("-" * 50)
+                    print(
+                        f"[INFO] Usa la opción 2 para procesar cualquiera de estos archivos")
                 else:
-                    print("[INFO] No se encontraron PDFs en el directorio ./pdfs")
+                    print(
+                        "\n[INFO] No se encontraron PDFs en el directorio ./pdfs")
+                    print(
+                        "[TIP] Coloca archivos PDF en el directorio 'pdfs' para procesarlos")
             case "2":
                 if pdf := select_pdf():
                     _convert_pdf(PDF_DIR / pdf)
             case "3":
                 if pdf := select_pdf():
+                    print(f"\nValidando PDF: {pdf}")
+                    print("-" * 50)
                     try:
+                        print("Analizando estructura del documento...")
                         validate_pdf_use_case = ValidatePDFUseCase(
                             document_port=None)
                         result = validate_pdf_use_case.execute(PDF_DIR / pdf)
 
                         print("\n=== Resultados de validación ===")
+                        status = "[OK]" if result['valid'] else "[ERROR]"
                         print(
-                            f"Validez: {'Válido' if result['valid'] else 'Inválido'}")
+                            f"{status} Validez: {'Válido' if result['valid'] else 'Inválido'}")
                         print(f"Mensaje: {result['message']}")
                         print(f"Páginas totales: {result['total_pages']}")
                         print(f"Páginas digitales: {result['digital_pages']}")
                         print(f"Páginas escaneadas: {result['scanned_pages']}")
+
+                        if result['valid']:
+                            print(
+                                "[INFO] El documento está listo para procesamiento")
+                        else:
+                            print(
+                                "[WARNING] El documento requiere revisión antes del procesamiento")
+
                     except Exception as e:
                         logger.exception("Error en la validación de PDF")
                         print(f"[ERROR] Error al validar PDF: {e}")
+                        print("Revisa los logs para más detalles")
             case "4":
                 ConfigMenu.show_provider_menu()
             case "5":
                 _show_cache_stats()
             case "6":
-                print("\n¡Hasta luego!")
+                print("\nHasta luego!")
                 sys.exit(0)
             case _:
                 print("[ERROR] Opción inválida")
