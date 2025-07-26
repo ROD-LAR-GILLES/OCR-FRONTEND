@@ -5,7 +5,8 @@ Este módulo contiene las interfaces de usuario que permiten interactuar
 con la aplicación, incluyendo CLI y API REST.
 """
 
-from .cli_menu import main_loop, list_pdfs, select_pdf
+from .cli_menu import main_loop
+from .cli import list_pdfs, select_pdf
 from .config_menu import ConfigMenu
 
 # La API REST se carga condicionalmente para no requerir dependencias
@@ -17,10 +18,3 @@ try:
 except ImportError:
     # FastAPI no está instalado, solo exponemos las interfaces CLI
     __all__ = ["main_loop", "list_pdfs", "select_pdf", "ConfigMenu"]
-
-__all__ = [
-    'run_cli',
-    'list_pdfs',
-    'select_pdf',
-    'ConfigMenu',
-]

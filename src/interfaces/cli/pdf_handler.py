@@ -4,7 +4,7 @@ Gestión de PDFs - Funciones para listar y seleccionar archivos PDF.
 
 from typing import List, Optional
 from pathlib import Path
-from .config import PDF_DIR
+from .constants import PDF_DIR
 
 
 def list_pdfs() -> List[str]:

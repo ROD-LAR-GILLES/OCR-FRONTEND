@@ -7,16 +7,13 @@ from loguru import logger
 import sys
 from pathlib import Path
 
-from . import list_pdfs, select_pdf, convert_pdf, show_cache_stats, show_llm_status
-from .config import PDF_DIR
-
-import sys
-from interfaces.config_menu import ConfigMenu
 from .helpers import show_llm_status
 from .pdf_handler import select_pdf
 from .processing import convert_pdf
-from .cache_manager import show_cache_menu
-from . import PDF_DIR
+from .constants import PDF_DIR
+
+import sys
+from interfaces.config_menu import ConfigMenu
 
 
 def main_loop() -> None:
@@ -27,11 +24,10 @@ def main_loop() -> None:
         print("\nOpciones disponibles:")
         print("1. Convertir PDF a Markdown")
         print("2. Configuración")
-        print("3. Gestión de caché")
-        print("4. Información del sistema")
-        print("5. Salir")
+        print("3. Información del sistema")
+        print("4. Salir")
 
-        choice = input("\nSeleccione una opción (1-5): ").strip()
+        choice = input("\nSeleccione una opción (1-4): ").strip()
 
         match choice:
             case "1":
@@ -39,10 +35,8 @@ def main_loop() -> None:
             case "2":
                 ConfigMenu.show_provider_menu()
             case "3":
-                show_cache_menu()
-            case "4":
                 show_system_info()
-            case "5":
+            case "4":
                 print("\n¡Hasta luego!")
                 sys.exit(0)
             case _:
@@ -87,26 +81,3 @@ def show_system_info():
     print(f"Proveedor LLM: {config.llm_provider}")
 
     print("-" * 40)
-
-
-def show_help():
-    """Muestra ayuda sobre el uso del sistema."""
-    print("\n=== Ayuda del Sistema OCR-PYMUPDF ===")
-    print("-" * 50)
-    print("Este sistema permite convertir archivos PDF a formato Markdown")
-    print("utilizando OCR (reconocimiento óptico de caracteres) cuando sea necesario.")
-    print()
-    print("INSTRUCCIONES:")
-    print("1. Coloca archivos PDF en el directorio './pdfs'")
-    print("2. Ejecuta la opción 1 para convertir PDFs")
-    print("3. Los archivos resultantes se guardan automáticamente")
-    print()
-    print("CONFIGURACIÓN:")
-    print("- Usa la opción 2 para configurar el procesamiento LLM")
-    print("- La opción 3 permite gestionar la caché OCR")
-    print()
-    print("SOLUCIÓN DE PROBLEMAS:")
-    print("- Verifica que los PDFs no estén corruptos")
-    print("- Asegúrate de tener permisos de escritura")
-    print("- Consulta los logs para errores detallados")
-    print("-" * 50)

@@ -9,12 +9,12 @@ Este módulo organiza la interfaz CLI en componentes separados:
 - helpers: Utilidades compartidas
 """
 
+from .constants import PDF_DIR
 from .helpers import show_llm_status
 from .cache_manager import show_cache_stats
 from .processing import convert_pdf
 from .pdf_handler import list_pdfs, select_pdf
 from .menu import main_loop
-from .config import PDF_DIR
 
 # Importar componentes principales para fácil acceso
 
