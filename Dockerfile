@@ -50,6 +50,7 @@ RUN mkdir -p data/corrections \
 
 COPY --from=builder /install /usr/local
 
+COPY app.py .
 COPY src/ src/
 COPY data/ data/
 COPY pdfs/ pdfs/
@@ -59,4 +60,4 @@ COPY result/ result/
 RUN chown -R 1000:1000 /app/data && \
     chmod -R 777 /app/data
 
-CMD ["python", "-m", "src.main"]
+CMD ["python", "app.py", "--mode", "cli"]
