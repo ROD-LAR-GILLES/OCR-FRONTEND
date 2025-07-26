@@ -35,10 +35,9 @@ class ConfigMenu:
             print("\nOpciones:")
             print("1. Cambiar proveedor LLM")
             print("2. Cambiar modo LLM")
-            print("3. Configurar API keys")
             print("0. Volver al menú principal")
 
-            choice = input("\nSeleccione una opción (0-3): ").strip()
+            choice = input("\nSeleccione una opción (0-2): ").strip()
 
             if choice == "0":
                 break
@@ -46,8 +45,6 @@ class ConfigMenu:
                 cls._change_provider()
             elif choice == "2":
                 cls._change_mode()
-            elif choice == "3":
-                cls._configure_api_keys()
             else:
                 print("Opción inválida. Inténtelo de nuevo.")
 
@@ -87,29 +84,4 @@ class ConfigMenu:
         else:
             print("Opción inválida.")
 
-    @classmethod
-    def _configure_api_keys(cls) -> None:
-        """Configura las claves API para los proveedores LLM."""
-        print("\n=== Configurar API Keys ===")
-        print("1. OpenAI API Key")
-        print("2. Google Gemini API Key")
-        print("0. Volver")
 
-        choice = input("\nSeleccione una opción: ").strip()
-
-        try:
-            if choice == "1":
-                key = input("OpenAI API Key: ").strip()
-                if key:
-                    config.openai_api_key = key
-                    print("API Key de OpenAI actualizada.")
-            elif choice == "2":
-                key = input("Google Gemini API Key: ").strip()
-                if key:
-                    config.gemini_api_key = key
-                    print("API Key de Google Gemini actualizada.")
-            elif choice != "0":
-                print("Opción inválida.")
-        except Exception as e:
-            logger.error(f"Error configurando API key: {e}")
-            print(f"\nError al configurar API key. Consulte los logs para más detalles.")
