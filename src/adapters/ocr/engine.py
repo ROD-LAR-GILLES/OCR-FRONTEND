@@ -8,7 +8,6 @@ Motor principal de OCR que coordina todos los módulos.
 """
 
 import logging
-import re
 from io import BytesIO
 
 import cv2

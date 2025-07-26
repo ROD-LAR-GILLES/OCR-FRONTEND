@@ -27,8 +27,6 @@ def main_loop() -> None:
         print("\nOpciones disponibles:")
         print("1. Convertir PDF a Markdown")
         print("2. Configuración")
-        print("   2.1. Cambiar proveedor LLM")
-        print("   2.2. Cambiar modo LLM")
         print("3. Información del sistema")
         print("4. Salir")
 
