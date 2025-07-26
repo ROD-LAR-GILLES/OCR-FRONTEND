@@ -10,7 +10,7 @@ El proyecto implementa una **arquitectura hexagonal (ports & adapters)** limpia 
 
 - **🎯 Dominio**: Lógica de negocio pura
 - **⚙️ Aplicación**: Casos de uso y servicios
-- **🔌 Adaptadores**: Integraciones externas  
+- **🔌 Adaptadores**: Integraciones externas
 - **🏗️ Infraestructura**: Implementaciones técnicas
 - **🖥️ Interfaces**: CLI y API REST
 
@@ -19,17 +19,20 @@ El proyecto implementa una **arquitectura hexagonal (ports & adapters)** limpia 
 ## ✨ Características
 
 ### 🔄 Procesamiento Inteligente
+
 - **OCR Selectivo**: Aplica OCR solo donde es necesario
 - **Extracción de Tablas**: Detecta y preserva estructura tabular
 - **Refinamiento LLM**: Mejora el texto con IA (OpenAI/Gemini)
 - **Detección de Idioma**: Soporte multilenguaje automático
 
 ### 🎯 Interfaces Múltiples
+
 - **CLI Interactivo**: Menú intuitivo para uso local
 - **API REST**: Endpoints para integración
 - **Procesamiento Batch**: Múltiples documentos
 
 ### ⚡ Características Técnicas
+
 - **Caché Inteligente**: Evita reprocesamiento
 - **Logging Avanzado**: Trazabilidad completa
 - **Configuración Centralizada**: Gestión unificada

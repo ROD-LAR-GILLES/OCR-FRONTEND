@@ -52,27 +52,32 @@ src/
 ## Principios Arquitectónicos Implementados
 
 ### 1. Arquitectura Hexagonal (Ports & Adapters)
+
 - **Dominio**: Lógica de negocio pura, sin dependencias externas
 - **Aplicación**: Casos de uso y servicios de aplicación
 - **Infraestructura**: Implementaciones técnicas
 - **Interfaces**: UI, API, CLI
 
 ### 2. Inyección de Dependencias
+
 - `DependencyContainer` centraliza la creación de objetos
 - Composición root en `app.py`
 - Interfaces abstraen implementaciones
 
 ### 3. Configuración Centralizada
+
 - `shared.constants.config` unifica toda la configuración
 - Sistema de configuración inmutable con dataclasses
 - Validación de configuración integrada
 
 ### 4. Gestión de Errores Consistente
+
 - Excepciones tipadas por dominio
 - Contexto de error estructurado
 - Manejo centralizado en `shared.utils.error_handling`
 
 ### 5. Directorios Centralizados
+
 - `shared.constants.directories` elimina duplicación
 - Método `ensure_all_exist()` para inicialización
 - Compatibilidad hacia atrás con alias
@@ -80,6 +85,7 @@ src/
 ## Beneficios de la Refactorización
 
 ### ✅ Problemas Resueltos
+
 1. **Duplicación de Código**: Eliminada mediante centralización
 2. **Configuración Fragmentada**: Unificada en un solo lugar
 3. **Manejo de Errores Inconsistente**: Estandarizado
@@ -88,6 +94,7 @@ src/
 6. **Responsabilidades Mixtas**: Separadas por capas
 
 ### 🚀 Mejoras Implementadas
+
 1. **Testabilidad**: Inyección de dependencias facilita testing
 2. **Mantenibilidad**: Código organizado y responsabilidades claras
 3. **Extensibilidad**: Nuevas características fáciles de agregar
@@ -97,6 +104,7 @@ src/
 ## Patrones de Diseño Utilizados
 
 ### Composition Root
+
 ```python
 # app.py
 container = DependencyContainer()
@@ -104,6 +112,7 @@ use_case = container.get_pdf_to_markdown_use_case()
 ```
 
 ### Repository Pattern (Ports)
+
 ```python
 # domain/ports/document_port.py
 class DocumentPort(ABC):
@@ -113,6 +122,7 @@ class DocumentPort(ABC):
 ```
 
 ### Service Layer
+
 ```python
 # application/services/configuration_service.py
 class ConfigurationService:
@@ -121,6 +131,7 @@ class ConfigurationService:
 ```
 
 ### Error Handling Strategy
+
 ```python
 # shared/utils/error_handling.py
 class DocumentError(BaseApplicationError):
@@ -130,6 +141,7 @@ class DocumentError(BaseApplicationError):
 ## Guías de Uso
 
 ### Agregar Nueva Funcionalidad
+
 1. Definir caso de uso en `application/use_cases/`
 2. Crear puerto si necesita infraestructura
 3. Implementar adaptador en `adapters/` o `infrastructure/`
@@ -137,11 +149,13 @@ class DocumentError(BaseApplicationError):
 5. Exponer en interfaz apropiada (`cli/` o `api/`)
 
 ### Configurar Nueva Opción
+
 1. Agregar al dataclass apropiado en `shared/constants/config.py`
 2. Actualizar `ConfigurationService` si es necesario
 3. Agregar validación en `AppConfig.validate_configuration()`
 
 ### Manejar Nuevo Tipo de Error
+
 1. Crear excepción en `shared/utils/error_handling.py`
 2. Definir `ErrorType` apropiado
 3. Usar en código con contexto adecuado
@@ -149,6 +163,7 @@ class DocumentError(BaseApplicationError):
 ## Migración de Código Existente
 
 ### Antes (Problemático)
+
 ```python
 # Configuración directa
 from config import config
@@ -162,6 +177,7 @@ print("[ERROR] Algo salió mal")  # Sin contexto
 ```
 
 ### Después (Mejorado)
+
 ```python
 # Configuración centralizada
 from application.composition_root import DependencyContainer
@@ -181,8 +197,9 @@ raise DocumentError("Error procesando PDF", context)
 ## Estado Actual del Refactoring
 
 ### ✅ Completado
+
 - [x] Configuración centralizada
-- [x] Directorios centralizados  
+- [x] Directorios centralizados
 - [x] Inyección de dependencias
 - [x] Consolidación de archivos CLI
 - [x] Sistema de errores unificado
@@ -190,11 +207,13 @@ raise DocumentError("Error procesando PDF", context)
 - [x] Arquitectura hexagonal básica
 
 ### 🔄 En Progreso
+
 - [ ] Testing exhaustivo de integración
 - [ ] Documentación de API
 - [ ] Optimización de performance
 
 ### 📋 Pendiente (Opcional)
+
 - [ ] Implementar caché distribuido
 - [ ] Métricas de monitoreo
 - [ ] Configuración por variables de entorno
