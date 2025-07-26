@@ -1,8 +1,10 @@
-from loguru import logger
-from interfaces import main_loop
-from config import config
 import sys
 from pathlib import Path
+
+from loguru import logger
+
+from config import config
+from interfaces import main_loop
 
 
 def main() -> None:

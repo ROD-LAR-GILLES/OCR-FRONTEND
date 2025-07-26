@@ -5,21 +5,17 @@ Este módulo proporciona una clase de configuración centralizada que integra
 todas las configuraciones del sistema en un solo lugar, facilitando
 su acceso y modificación desde cualquier parte de la aplicación.
 """
+
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .api_settings import load_api_settings
 from .language_detection import get_config as get_language_config
-import os
-from pathlib import Path
-from typing import Dict, Any, Optional
-
-from .api_settings import load_api_settings
-from .language_detection import get_config as get_language_config
 from .llm_config import LLMConfig
-from .state import LLM_MODE, LLM_PROVIDER
 from .ocr_settings import OCRSettings
 from .settings import Settings
+from .state import LLM_MODE, LLM_PROVIDER
 
 
 class AppConfig:

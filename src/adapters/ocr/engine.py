@@ -10,6 +10,7 @@ Motor principal de OCR que coordina todos los módulos.
 import logging
 import re
 from io import BytesIO
+
 import cv2
 import fitz
 import numpy as np
@@ -19,10 +20,11 @@ from PIL import Image
 import config.state as state
 from adapters.llm_refiner import LLMRefiner
 
-from .config import build_tesseract_config, DPI
+from .config import DPI, build_tesseract_config
 from .image_processing import correct_rotation, estimate_psm_for_page
 from .tables import detect_table_regions, ocr_table_to_markdown
-from .text_processing import cleanup_text, detect_lists, apply_manual_corrections, segment_text_blocks, detect_structured_headings
+from .text_processing import (apply_manual_corrections, cleanup_text, detect_lists,
+                              detect_structured_headings, segment_text_blocks)
 
 # Inicializar el refinador LLM
 llm_refiner = LLMRefiner()
