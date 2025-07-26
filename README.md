@@ -1,6 +1,39 @@
 # OCR-FRONTEND
 
-Sistema de procesamiento OCR con arquitectura hexagonal limpia que permite convertir documentos PDF a formato Markdown utilizando técnicas avanzadas de OCR y procesamiento de lenguaje natural.
+# OCR-FRONTEND
+
+Sistema OCR avanzado con arquitectura hexagonal para procesamiento de documentos PDF a Markdown.
+
+## 🏗️ Arquitectura
+
+El proyecto implementa una **arquitectura hexagonal (ports & adapters)** limpia con las siguientes capas:
+
+- **🎯 Dominio**: Lógica de negocio pura
+- **⚙️ Aplicación**: Casos de uso y servicios
+- **🔌 Adaptadores**: Integraciones externas  
+- **🏗️ Infraestructura**: Implementaciones técnicas
+- **🖥️ Interfaces**: CLI y API REST
+
+> 📖 Ver [ARCHITECTURE.md](docs/ARCHITECTURE.md) para detalles completos
+
+## ✨ Características
+
+### 🔄 Procesamiento Inteligente
+- **OCR Selectivo**: Aplica OCR solo donde es necesario
+- **Extracción de Tablas**: Detecta y preserva estructura tabular
+- **Refinamiento LLM**: Mejora el texto con IA (OpenAI/Gemini)
+- **Detección de Idioma**: Soporte multilenguaje automático
+
+### 🎯 Interfaces Múltiples
+- **CLI Interactivo**: Menú intuitivo para uso local
+- **API REST**: Endpoints para integración
+- **Procesamiento Batch**: Múltiples documentos
+
+### ⚡ Características Técnicas
+- **Caché Inteligente**: Evita reprocesamiento
+- **Logging Avanzado**: Trazabilidad completa
+- **Configuración Centralizada**: Gestión unificada
+- **Manejo de Errores Robusto**: Recuperación automática
 
 ## 🏗️ Arquitectura
 
