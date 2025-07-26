@@ -1,18 +1,13 @@
 """
-API REST para el sistema OCR-FRONTEND.
+Módulo de inicialización para la API REST.
 """
-from .routes import processing_routes
-from .routes import health_routes
-from .routes import document_routes
+from . import endpoints, process, monitoring, results
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
-from infrastructure.logging_setup import logger
-from infrastructure.storage_adapter import StorageAdapter
-from infrastructure.document_adapter import DocumentAdapter
-
-# Inicialización de la aplicación
+# Inicialización
 app = FastAPI(
     title="OCR-FRONTEND API",
     description="API REST para el sistema de OCR y procesamiento de documentos",
@@ -28,12 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Montar directorio estático
+# Crear directorios necesarios
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+# Montar directorio estático para la interfaz web
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Importar rutas
-
-# Registrar rutas
-app.include_router(document_routes.router, prefix="/api")
-app.include_router(health_routes.router, prefix="/api")
-app.include_router(processing_routes.router, prefix="/api")
+# Importar rutas después de la inicialización para evitar importaciones circulares
