@@ -33,17 +33,17 @@ class ConfigMenu:
             print(f"Proveedor actual: {current_provider or 'Ninguno'}")
             print(f"Modo actual: {current_mode or 'Desactivado'}")
             print("\nOpciones:")
-            print("2.1. Cambiar proveedor LLM")
-            print("2.2. Cambiar modo LLM")
-            print("2.0. Volver al menú principal")
+            print("1. Cambiar proveedor LLM")
+            print("2. Cambiar modo LLM")
+            print("0. Volver al menú principal")
 
-            choice = input("\nSeleccione una opción (2.0-2.2): ").strip()
+            choice = input("\nSeleccione una opción (0-2): ").strip()
 
-            if choice == "2.0":
+            if choice == "0":
                 break
-            elif choice == "2.1":
+            elif choice == "1":
                 cls._change_provider()
-            elif choice == "2.2":
+            elif choice == "2":
                 cls._change_mode()
             else:
                 print("[ERROR] Opción inválida. Inténtelo de nuevo.")
@@ -51,7 +51,7 @@ class ConfigMenu:
     @classmethod
     def _change_provider(cls) -> None:
         """Cambia el proveedor LLM."""
-        print("\n=== Opción 2.1. Cambiar Proveedor LLM ===")
+        print("\n=== Opción 1. Cambiar Proveedor LLM ===")
         print("Proveedores disponibles:")
 
         for key, (name, _) in cls.PROVIDERS.items():
@@ -69,7 +69,7 @@ class ConfigMenu:
     @classmethod
     def _change_mode(cls) -> None:
         """Cambia el modo de operación LLM."""
-        print("\n=== Opción 2.2. Cambiar Modo LLM ===")
+        print("\n=== Opción 2. Cambiar Modo LLM ===")
         print("Modos disponibles:")
 
         for key, (name, _) in cls.MODES.items():
