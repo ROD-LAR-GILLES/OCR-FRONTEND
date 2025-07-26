@@ -45,7 +45,7 @@ def cleanup_temp_files():
         # Directorios a revisar
         dirs_to_check = [
             Path("uploads"),
-            Path("cache"),
+            Path("data/cache"),
             Path("logs"),
             Path("output")
         ]

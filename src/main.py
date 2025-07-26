@@ -65,12 +65,19 @@ def _setup_logging() -> None:
         level="ERROR"
     )
 
+
 def _ensure_directories() -> None:
     """Asegura que existan los directorios necesarios."""
+    # Crear directorios base
     Path("pdfs").mkdir(exist_ok=True)
     Path("output").mkdir(exist_ok=True)
     Path("logs").mkdir(exist_ok=True)
-    Path("cache").mkdir(exist_ok=True)
+
+    # Asegurar estructura de datos
+    data_path = Path("data")
+    data_path.mkdir(exist_ok=True)
+    (data_path / "cache").mkdir(exist_ok=True)  # Cache dentro de data/
+
 
 def _run_non_interactive_mode() -> None:
     """Ejecuta el modo no interactivo para procesar un PDF desde la línea de comandos."""
@@ -104,6 +111,7 @@ def _run_non_interactive_mode() -> None:
     except Exception as exc:
         logger.exception(exc)
         print("[ERROR] Falló la conversión a Markdown.")
+
 
 def _show_startup_info() -> None:
     """Muestra información de inicialización."""

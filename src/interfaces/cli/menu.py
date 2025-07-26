@@ -11,8 +11,6 @@ from .helpers import show_llm_status
 from .pdf_handler import select_pdf
 from .processing import convert_pdf
 from .constants import PDF_DIR
-
-import sys
 from interfaces.config_menu import ConfigMenu
 
 
