@@ -7,7 +7,6 @@ import sys
 import time
 from pathlib import Path
 import argparse
-import shutil
 import json
 from infrastructure.logging_setup import logger
 
