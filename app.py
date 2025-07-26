@@ -3,6 +3,9 @@
 Punto de entrada unificado para la aplicación OCR-FRONTEND.
 Respeta la arquitectura hexagonal mediante composition root mejorado.
 """
+from application.composition_root import DependencyContainer
+from shared.constants.directories import Directories
+from infrastructure.logging_setup import logger
 import sys
 import time
 from pathlib import Path
@@ -13,9 +16,6 @@ import json
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 # Importar después de configurar el path
-from infrastructure.logging_setup import logger
-from shared.constants.directories import Directories
-from application.composition_root import DependencyContainer
 
 
 def create_cli_application():
@@ -25,10 +25,10 @@ def create_cli_application():
     """
     # Asegurar que los directorios existen
     Directories.ensure_all_exist()
-    
+
     # Crear contenedor de dependencias
     container = DependencyContainer()
-    
+
     # Importar y retornar la función principal
     from interfaces.cli import main_loop
     return main_loop
@@ -41,10 +41,10 @@ def create_api_application():
     """
     # Asegurar que los directorios existen
     Directories.ensure_all_exist()
-    
+
     # Crear contenedor de dependencias
     container = DependencyContainer()
-    
+
     # Importar función de inicio API
     from interfaces.api_rest import start_api
     return start_api
