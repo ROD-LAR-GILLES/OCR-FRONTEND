@@ -4,8 +4,12 @@ Punto de entrada unificado para la aplicación OCR-FRONTEND.
 Respeta la arquitectura hexagonal mediante composition root.
 """
 import sys
+import time
 from pathlib import Path
 import argparse
+import shutil
+import json
+from infrastructure.logging_setup import logger
 
 # Agregar src al path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
@@ -27,6 +31,77 @@ def create_api_application():
     """
     from interfaces.api_rest import start_api
     return start_api
+
+
+def cleanup_temp_files():
+    """
+    Limpia archivos temporales y directorios vacíos.
+
+    - Elimina archivos de progreso sin actividad reciente
+    - Elimina archivos de validación huérfanos
+    - Elimina directorios vacíos
+    - Limpia archivos de caché antiguos
+    """
+    try:
+        # Directorios a revisar
+        dirs_to_check = [
+            Path("uploads"),
+            Path("cache"),
+            Path("logs"),
+            Path("output")
+        ]
+
+        for base_dir in dirs_to_check:
+            if not base_dir.exists():
+                continue
+
+            # Tiempo actual
+            current_time = time.time()
+
+            # Revisar cada subdirectorio
+            for item in base_dir.iterdir():
+                try:
+                    if item.is_dir():
+                        # Verificar si el directorio está vacío
+                        files = list(item.iterdir())
+                        if not files:
+                            item.rmdir()
+                            logger.info(f"Eliminado directorio vacío: {item}")
+                            continue
+
+                        # Verificar archivos de progreso antiguos
+                        progress_file = item / "progress.json"
+                        if progress_file.exists():
+                            stats = progress_file.stat()
+                            # Si el archivo tiene más de 24 horas sin modificarse
+                            if current_time - stats.st_mtime > 86400:
+                                with open(progress_file) as f:
+                                    progress_data = json.load(f)
+                                    # Si el proceso no está en progreso o tiene error
+                                    if progress_data.get("status") in ["error", "completed", None]:
+                                        progress_file.unlink()
+                                        logger.info(
+                                            f"Eliminado archivo de progreso antiguo: {progress_file}")
+
+                        # Verificar archivos de validación huérfanos
+                        validation_file = item / "validation.json"
+                        if validation_file.exists() and not (item / "document.pdf").exists():
+                            validation_file.unlink()
+                            logger.info(
+                                f"Eliminado archivo de validación huérfano: {validation_file}")
+
+                    elif item.is_file() and base_dir.name == "cache":
+                        # Eliminar archivos de caché antiguos (más de 7 días)
+                        if current_time - item.stat().st_mtime > 604800:
+                            item.unlink()
+                            logger.info(
+                                f"Eliminado archivo de caché antiguo: {item}")
+
+                except Exception as e:
+                    logger.error(f"Error procesando {item}: {e}")
+
+    except Exception as e:
+        logger.error(f"Error en limpieza de archivos temporales: {e}")
 
 
 def main():
@@ -55,6 +130,10 @@ def main():
     args = parser.parse_args()
 
     try:
+        # Limpiar archivos temporales al inicio
+        print(" Limpiando archivos temporales...")
+        cleanup_temp_files()
+
         if args.mode == "cli":
             print(" Iniciando aplicación CLI...")
             cli_app = create_cli_application()
