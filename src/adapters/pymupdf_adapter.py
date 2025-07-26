@@ -9,25 +9,26 @@ serving as a bridge between domain logic and external libraries.
 """
 
 from __future__ import annotations
-from . import ocr_adapter
-from loguru import logger
-from PIL import Image
-import fitz
-
 import io
+import os
 from pathlib import Path
 from typing import List
-from . import parallel_ocr
-import os
-import config.state as state
+
+try:
+    import fitz
+except ImportError:
+    fitz = None
+
+from PIL import Image
+from loguru import logger
+
+# Imports actualizados para nueva arquitectura
+from shared.constants.config import config
 from adapters.llm_refiner import LLMRefiner
+from . import ocr_adapter, parallel_ocr
 
-# Inicializar el refinador LLM
+# Inicializar el refinador LLM (será manejado por el contenedor de dependencias)
 llm_refiner = LLMRefiner()
-
-# ──────── External imports ────────
-
-# ──────── Internal adapters ────────
 
 
 ###############################################################################
@@ -64,9 +65,9 @@ def extract_markdown(pdf_path: Path) -> str:
     # Fase final - Refinamiento LLM
     logger.info("Iniciando refinamiento con LLM")
     try:
-        if state.LLM_MODE != "off":
+        if config.llm.mode != "off":
             logger.info(
-                f"Aplicando refinamiento LLM con modo: {state.LLM_MODE}")
+                f"Aplicando refinamiento LLM con modo: {config.llm.mode}")
             md_out = llm_refiner.prompt_refine(md_out)
             logger.info("Refinamiento LLM completado exitosamente")
     except Exception as exc:

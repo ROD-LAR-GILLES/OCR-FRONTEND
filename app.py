@@ -1,40 +1,58 @@
 #!/usr/bin/env python3
 """
 Punto de entrada unificado para la aplicación OCR-FRONTEND.
-Respeta la arquitectura hexagonal mediante composition root.
+Respeta la arquitectura hexagonal mediante composition root mejorado.
 """
 import sys
 import time
 from pathlib import Path
 import argparse
 import json
-from infrastructure.logging_setup import logger
 
 # Agregar src al path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
+
+# Importar después de configurar el path
+from infrastructure.logging_setup import logger
+from shared.constants.directories import Directories
+from application.composition_root import DependencyContainer
 
 
 def create_cli_application():
     """
     Composition root para la aplicación CLI.
-    Inyecta todas las dependencias necesarias.
+    Inyecta todas las dependencias necesarias usando el contenedor.
     """
-    from interfaces.cli_menu import main_loop
+    # Asegurar que los directorios existen
+    Directories.ensure_all_exist()
+    
+    # Crear contenedor de dependencias
+    container = DependencyContainer()
+    
+    # Importar y retornar la función principal
+    from interfaces.cli import main_loop
     return main_loop
 
 
 def create_api_application():
     """
     Composition root para la aplicación API REST.
-    Inyecta todas las dependencias necesarias.
+    Inyecta todas las dependencias necesarias usando el contenedor.
     """
+    # Asegurar que los directorios existen
+    Directories.ensure_all_exist()
+    
+    # Crear contenedor de dependencias
+    container = DependencyContainer()
+    
+    # Importar función de inicio API
     from interfaces.api_rest import start_api
     return start_api
 
 
 def cleanup_temp_files():
     """
-    Limpia archivos temporales y directorios vacíos.
+    Limpia archivos temporales y directorios vacíos usando directorios centralizados.
 
     - Elimina archivos de progreso sin actividad reciente
     - Elimina archivos de validación huérfanos
@@ -42,6 +60,7 @@ def cleanup_temp_files():
     - Limpia archivos de caché antiguos
     """
     try:
+        from shared.constants.directories import UPLOAD_DIR, CACHE_DIR
         # Directorios a revisar
         dirs_to_check = [
             Path("uploads"),

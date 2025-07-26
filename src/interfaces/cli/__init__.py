@@ -1,19 +1,16 @@
 """
-CLI Module - Interfaz de línea de comandos modular.
+CLI Module - Interfaz de línea de comandos consolidada.
 
-Este módulo organiza la interfaz CLI en componentes separados:
+Este módulo organiza la interfaz CLI con componentes consolidados:
 - menu: Menú principal y navegación
-- pdf_handler: Gestión y selección de PDFs
+- pdf_management: Gestión consolidada de PDFs
 - processing: Funciones de procesamiento
-- cache_manager: Gestión de caché OCR
-- helpers: Utilidades compartidas
+- utils: Utilidades consolidadas (helpers + constantes)
 """
 
-from .constants import PDF_DIR
-from .helpers import show_llm_status
-from .cache_manager import show_cache_stats
+from .utils import show_llm_status, CLI_PDF_DIR
+from .pdf_management import pdf_manager, list_pdfs, select_pdf
 from .processing import convert_pdf
-from .pdf_handler import list_pdfs, select_pdf
 from .menu import main_loop
 
 # Importar componentes principales para fácil acceso
@@ -23,7 +20,7 @@ __all__ = [
     'list_pdfs',
     'select_pdf',
     'convert_pdf',
-    'show_cache_stats',
     'show_llm_status',
-    'PDF_DIR'
+    'pdf_manager',
+    'CLI_PDF_DIR'
 ]

@@ -14,7 +14,7 @@ from application.use_cases.validate_pdf import ValidatePDFUseCase
 from infrastructure.logging_setup import logger
 
 # Importaciones locales
-from .helpers import show_progress, print_success_summary, print_error_details
+from .utils import show_progress, print_success_summary, print_error_details
 
 # Crear contenedor de dependencias
 container = DependencyContainer()

@@ -13,7 +13,7 @@ except ImportError:
 from adapters import get_language_detector
 from shared.constants.config import config
 from interfaces.config_menu import ConfigMenu
-from .pdf_handler import select_pdf
+from .pdf_management import pdf_manager, select_pdf
 from .processing import convert_pdf
 from shared.constants.directories import PDF_DIR
 
@@ -27,8 +27,10 @@ def main_loop() -> None:
         print("\n----------- Información del Sistema ------------")
         print("------------------------------------------------")
         print(f"Directorio de PDFs:         {PDF_DIR}")
-        print(
-            f"PDFs disponibles:           {len(list(PDF_DIR.glob('*.pdf')))}")
+        pdf_stats = pdf_manager.get_directory_stats()
+        print(f"PDFs disponibles:           {pdf_stats['total_files']}")
+        print(f"PDFs válidos:               {pdf_stats['valid_pdfs']}")
+        print(f"Tamaño total:               {pdf_stats['total_size_mb']:.1f} MB")
 
         if fitz:
             print(f"PyMuPDF versión:           {fitz.version}")
