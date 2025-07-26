@@ -5,6 +5,11 @@ Este módulo proporciona una clase de configuración centralizada que integra
 todas las configuraciones del sistema en un solo lugar, facilitando
 su acceso y modificación desde cualquier parte de la aplicación.
 """
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from .api_settings import load_api_settings
+from .language_detection import get_config as get_language_config
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional

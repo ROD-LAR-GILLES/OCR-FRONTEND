@@ -5,6 +5,14 @@ Este módulo configura el sistema de logging para toda la aplicación,
 utilizando loguru para una salida formateada y colorida, y proporcionando
 decoradores y utilidades para facilitar el registro de eventos y tiempos de ejecución.
 """
+from datetime import datetime
+from functools import wraps
+from pathlib import Path
+from typing import Any, Callable
+
+from loguru import logger
+
+from config import config
 import logging
 import sys
 import time
