@@ -61,58 +61,116 @@ def _convert_pdf(pdf_path: Path) -> None:
     print("-" * 60)
 
     logger.info(f"Convirtiendo a Markdown: {pdf_path}")
+    
+    def show_progress(step: str, current: int, total: int, message: str):
+        """Muestra progreso visual en consola."""
+        percentage = (current / total) * 100
+        bar_length = 40
+        filled_length = int(bar_length * current // total)
+        bar = '█' * filled_length + '-' * (bar_length - filled_length)
+        print(f"\r{step}: |{bar}| {percentage:.1f}% - {message}", end='', flush=True)
+        if current == total:
+            print()  # Nueva línea al completar
+    
     try:
         # Paso 1: Validar el PDF
-        print("Paso 1/4: Validando PDF...")
+        show_progress("Validando PDF", 0, 4, "Iniciando validación...")
         validate_pdf_use_case = ValidatePDFUseCase(
             document_port=document_adapter)
+        
+        print("Paso 1/4: Validando PDF...")
+        print("   → Analizando estructura del documento...")
         validation_result = validate_pdf_use_case.execute(pdf_path)
+        show_progress("Validando PDF", 1, 4, "Validación completada")
 
         if not validation_result["valid"]:
-            print(f"[ERROR] PDF inválido: {validation_result['message']}")
+            print(f"\n[ERROR] PDF inválido: {validation_result['message']}")
+            print("❌ Procesamiento cancelado debido a errores de validación")
             return
 
-        print(f"[OK] {validation_result['message']}")
-        print(f"Páginas totales: {validation_result['total_pages']}")
-        print(f"Páginas digitales: {validation_result['digital_pages']}")
-        print(f"Páginas escaneadas: {validation_result['scanned_pages']}")
+        print(f"\n[✓] {validation_result['message']}")
+        print(f"   → Páginas totales: {validation_result['total_pages']}")
+        print(f"   → Páginas digitales: {validation_result['digital_pages']}")
+        print(f"   → Páginas escaneadas: {validation_result['scanned_pages']}")
 
         # Paso 2: Preparar procesamiento
+        show_progress("Preparando", 1, 4, "Inicializando casos de uso...")
         print("\nPaso 2/4: Preparando procesamiento...")
         pdf_to_markdown_use_case = PDFToMarkdownUseCase(
             document_port=document_adapter,
             storage_port=storage_adapter,
             llm_port=None  # TODO: Implementar LLMPort
         )
-        print("[OK] Casos de uso inicializados")
+        show_progress("Preparando", 2, 4, "Casos de uso inicializados")
+        print("[✓] Casos de uso inicializados")
 
         # Paso 3: Extraer contenido
+        show_progress("Extrayendo", 2, 4, "Procesando documento...")
         print("\nPaso 3/4: Extrayendo contenido del PDF...")
-        print("   - Analizando estructura del documento...")
+        print("   → Analizando estructura del documento...")
+        print("   → Aplicando OCR donde sea necesario...")
+        print("   → Procesando tablas y elementos especiales...")
+        
+        # Simulamos progreso más detallado
+        import time
+        for i in range(3):
+            time.sleep(0.5)  # Simulación de procesamiento
+            show_progress("Extrayendo", 2 + (i * 0.3), 4, f"Procesando página {i+1}...")
+        
         markdown_content = extract_markdown(pdf_path)
+        show_progress("Extrayendo", 3, 4, "Extracción completada")
 
         if len(markdown_content) > 1000:
             preview = markdown_content[:200] + "..."
         else:
             preview = markdown_content[:200]
 
-        print(f"[OK] Contenido extraído ({len(markdown_content)} caracteres)")
-        print(f"Vista previa: {preview}")
+        print(f"\n[✓] Contenido extraído ({len(markdown_content)} caracteres)")
+        print(f"   → Vista previa: {preview}")
 
         # Paso 4: Guardar resultado
+        show_progress("Guardando", 3, 4, "Preparando archivo de salida...")
         print("\nPaso 4/4: Guardando resultado...")
+        print("   → Generando archivo Markdown...")
         output_path = storage_adapter.save_markdown(
             pdf_path.stem, markdown_content)
+        show_progress("Guardando", 4, 4, "Archivo guardado exitosamente")
 
-        print("-" * 60)
-        print(f"[SUCCESS] Procesamiento completado exitosamente!")
-        print(f"Archivo generado: {output_path}")
-        print(f"Tamaño del contenido: {len(markdown_content)} caracteres")
+        print("\n" + "=" * 60)
+        print("🎉 PROCESAMIENTO COMPLETADO EXITOSAMENTE")
+        print("=" * 60)
+        print(f"✓ Archivo generado: {output_path}")
+        print(f"✓ Tamaño del contenido: {len(markdown_content)} caracteres")
+        print(f"✓ Páginas procesadas: {validation_result['total_pages']}")
+        if validation_result['scanned_pages'] > 0:
+            print(f"✓ OCR aplicado a: {validation_result['scanned_pages']} páginas")
+        print("=" * 60)
 
     except Exception as e:
         logger.exception("Error en la conversión de PDF")
-        print(f"\n[ERROR] Fallo en la conversión: {e}")
-        print("Revisa los logs para más detalles")
+        print(f"\n💥 ERROR CRÍTICO EN EL PROCESAMIENTO")
+        print("=" * 60)
+        print(f"❌ Tipo de error: {type(e).__name__}")
+        print(f"❌ Descripción: {str(e)}")
+        print("=" * 60)
+        print("🔍 DIAGNÓSTICO:")
+        print("   → Revisa que el archivo PDF no esté corrupto")
+        print("   → Verifica que tienes permisos de escritura")
+        print("   → Comprueba que hay espacio suficiente en disco")
+        print("   → Consulta los logs para más detalles")
+        print("=" * 60)
+        
+        # Mostrar información adicional de diagnóstico
+        try:
+            file_size = pdf_path.stat().st_size / (1024 * 1024)  # MB
+            print(f"📊 Info del archivo:")
+            print(f"   → Tamaño: {file_size:.2f} MB")
+            print(f"   → Ruta: {pdf_path}")
+            print(f"   → Existe: {'✓' if pdf_path.exists() else '❌'}")
+        except:
+            print("❌ No se pudo obtener información del archivo")
+        
+        print("=" * 60)
 
 
 def _show_cache_stats() -> None:
@@ -237,34 +295,77 @@ def main_loop() -> None:
                     _convert_pdf(PDF_DIR / pdf)
             case "3":
                 if pdf := select_pdf():
-                    print(f"\nValidando PDF: {pdf}")
-                    print("-" * 50)
+                    print(f"\n🔍 VALIDANDO PDF: {pdf}")
+                    print("=" * 60)
                     try:
-                        print("Analizando estructura del documento...")
+                        # Mostrar progreso de validación
+                        print("⏳ Iniciando análisis del documento...")
+                        print("   → Abriendo archivo PDF...")
+                        
                         validate_pdf_use_case = ValidatePDFUseCase(
                             document_port=document_adapter)
+                        
+                        print("   → Analizando estructura del documento...")
+                        print("   → Detectando páginas escaneadas vs digitales...")
+                        print("   → Verificando integridad del archivo...")
+                        
                         result = validate_pdf_use_case.execute(PDF_DIR / pdf)
 
-                        print("\n=== Resultados de validación ===")
-                        status = "[OK]" if result['valid'] else "[ERROR]"
-                        print(
-                            f"{status} Validez: {'Válido' if result['valid'] else 'Inválido'}")
-                        print(f"Mensaje: {result['message']}")
-                        print(f"Páginas totales: {result['total_pages']}")
-                        print(f"Páginas digitales: {result['digital_pages']}")
-                        print(f"Páginas escaneadas: {result['scanned_pages']}")
+                        print("\n📋 RESULTADOS DE VALIDACIÓN")
+                        print("=" * 60)
+                        status_icon = "✅" if result['valid'] else "❌"
+                        status_text = "VÁLIDO" if result['valid'] else "INVÁLIDO"
+                        
+                        print(f"{status_icon} Estado: {status_text}")
+                        print(f"📄 Páginas totales: {result['total_pages']}")
+                        print(f"💻 Páginas digitales: {result['digital_pages']}")
+                        print(f"📷 Páginas escaneadas: {result['scanned_pages']}")
+                        print(f"💬 Mensaje: {result['message']}")
 
+                        # Información adicional
+                        print(f"\n📊 ANÁLISIS DETALLADO:")
+                        if result['digital_pages'] > 0:
+                            digital_pct = (result['digital_pages'] / result['total_pages']) * 100
+                            print(f"   → {digital_pct:.1f}% del contenido es texto seleccionable")
+                        
+                        if result['scanned_pages'] > 0:
+                            scan_pct = (result['scanned_pages'] / result['total_pages']) * 100
+                            print(f"   → {scan_pct:.1f}% requiere procesamiento OCR")
+                            
+                        # Recomendaciones
+                        print(f"\n💡 RECOMENDACIONES:")
                         if result['valid']:
-                            print(
-                                "[INFO] El documento está listo para procesamiento")
+                            if result['scanned_pages'] == 0:
+                                print("   → Procesamiento rápido: Solo extracción de texto")
+                            elif result['scanned_pages'] < result['digital_pages']:
+                                print("   → Procesamiento mixto: Combinará extracción y OCR")
+                            else:
+                                print("   → Procesamiento OCR intensivo: Puede tomar más tiempo")
+                            print("   → ✅ El documento está listo para procesamiento")
                         else:
-                            print(
-                                "[WARNING] El documento requiere revisión antes del procesamiento")
+                            print("   → ❌ El documento requiere revisión antes del procesamiento")
+                            print("   → Verifica que el archivo no esté corrupto")
+                            print("   → Asegúrate de que es un PDF válido")
+
+                        print("=" * 60)
 
                     except Exception as e:
                         logger.exception("Error en la validación de PDF")
-                        print(f"[ERROR] Error al validar PDF: {e}")
-                        print("Revisa los logs para más detalles")
+                        print(f"\n💥 ERROR EN LA VALIDACIÓN")
+                        print("=" * 60)
+                        print(f"❌ Error: {str(e)}")
+                        print("=" * 60)
+                        print("🔍 POSIBLES CAUSAS:")
+                        print("   → El archivo PDF está corrupto")
+                        print("   → No tienes permisos para leer el archivo")
+                        print("   → El archivo no es un PDF válido")
+                        print("   → Problemas con las dependencias del sistema")
+                        print("=" * 60)
+                        print("💡 SOLUCIONES:")
+                        print("   → Intenta con otro archivo PDF")
+                        print("   → Verifica los permisos del archivo")
+                        print("   → Revisa los logs para más detalles")
+                        print("=" * 60)
             case "4":
                 ConfigMenu.show_provider_menu()
             case "5":

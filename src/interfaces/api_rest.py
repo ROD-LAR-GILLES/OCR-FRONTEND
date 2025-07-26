@@ -230,42 +230,103 @@ async def process_document(doc_id: str, llm_mode: Optional[str] = None):
     # Guardar estado de progreso
     progress_file = doc_dir / "progress.json"
 
-    def update_progress(stage: str, progress: int, message: str):
-        """Actualiza el archivo de progreso."""
+    def update_progress(stage: str, progress: int, message: str, details: str = None):
+        """Actualiza el archivo de progreso con información detallada."""
         progress_data = {
             "stage": stage,
             "progress": progress,
             "message": message,
-            "timestamp": time.time()
+            "details": details or "",
+            "timestamp": time.time(),
+            "status": "success" if progress >= 0 else "error"
         }
-        with open(progress_file, "w") as f:
-            json.dump(progress_data, f)
-        logger.info(f"Progreso {doc_id}: {stage} - {progress}% - {message}")
+        try:
+            with open(progress_file, "w") as f:
+                json.dump(progress_data, f, indent=2)
+            logger.info(f"Progreso {doc_id}: {stage} - {progress}% - {message}")
+            if details:
+                logger.info(f"Detalles {doc_id}: {details}")
+        except Exception as e:
+            logger.error(f"Error guardando progreso para {doc_id}: {e}")
 
     try:
         update_progress(
-            "iniciando", 0, "Iniciando procesamiento del documento")
+            "iniciando", 0, "Iniciando procesamiento del documento",
+            "Preparando entorno y validando parámetros")
 
+        # Validación inicial más detallada
         logger.info(f"Extrayendo contenido del PDF: {doc_id}")
-        update_progress("extrayendo", 25, "Extrayendo texto del PDF")
+        update_progress("validando", 10, "Validando documento PDF", 
+                       "Verificando integridad y estructura del archivo")
+        
+        # Agregar validación explícita
+        try:
+            validate_pdf_use_case = ValidatePDFUseCase(document_port=document_adapter)
+            validation_result = validate_pdf_use_case.execute(pdf_path)
+            
+            if not validation_result.get("valid", False):
+                update_progress("error", -1, "Documento PDF inválido", 
+                               f"Error de validación: {validation_result.get('message', 'Documento corrupto o ilegible')}")
+                raise HTTPException(
+                    status_code=422, 
+                    detail=f"Documento inválido: {validation_result.get('message', 'PDF corrupto')}")
+            
+            update_progress("validado", 20, "Documento validado correctamente",
+                           f"Total: {validation_result['total_pages']} páginas, "
+                           f"Escaneadas: {validation_result['scanned_pages']}, "
+                           f"Digitales: {validation_result['digital_pages']}")
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            update_progress("error", -1, "Error en validación", str(e))
+            raise
+
+        update_progress("extrayendo", 25, "Extrayendo texto del PDF",
+                       "Aplicando OCR y extracción de texto según el tipo de página")
 
         # TODO: Implementar llamada al caso de uso real cuando se completen los puertos
         # Por ahora, usamos el adaptador directamente
         from adapters.pymupdf_adapter import extract_markdown
 
         update_progress("procesando", 50,
-                        "Aplicando OCR y extracción de texto")
-        markdown_content = extract_markdown(pdf_path)
-        logger.info(f"Extracción de contenido completada: {doc_id}")
+                        "Aplicando OCR y extracción de texto",
+                        "Procesando páginas individuales y detectando tablas")
+        
+        try:
+            markdown_content = extract_markdown(pdf_path)
+            
+            if not markdown_content or len(markdown_content.strip()) < 10:
+                update_progress("error", -1, "Contenido vacío o insuficiente",
+                               "El PDF no contiene texto extraíble o está completamente vacío")
+                raise HTTPException(
+                    status_code=422,
+                    detail="El documento no contiene contenido procesable")
+            
+            logger.info(f"Extracción de contenido completada: {doc_id}")
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            update_progress("error", -1, "Error en extracción de contenido", str(e))
+            raise
 
-        update_progress("guardando", 75, "Guardando resultado")
+        update_progress("guardando", 75, "Guardando resultado",
+                       "Generando archivo Markdown y metadatos")
 
         # Guardar resultado
-        output_path = storage_adapter.save_markdown(doc_id, markdown_content)
-        logger.info(f"Resultado guardado en: {output_path}")
+        try:
+            output_path = storage_adapter.save_markdown(doc_id, markdown_content)
+            logger.info(f"Resultado guardado en: {output_path}")
+            
+        except Exception as e:
+            update_progress("error", -1, "Error guardando resultado", str(e))
+            raise
 
         update_progress("completado", 100,
-                        "Procesamiento completado exitosamente")
+                        "Procesamiento completado exitosamente",
+                        f"Archivo generado: {output_path.name}, "
+                        f"Tamaño: {len(markdown_content)} caracteres")
 
         return {
             "document_id": doc_id,
@@ -273,14 +334,45 @@ async def process_document(doc_id: str, llm_mode: Optional[str] = None):
             "output_path": str(output_path),
             "llm_mode": llm_mode or original_mode,
             "message": "Documento procesado exitosamente",
+            "content_stats": {
+                "characters": len(markdown_content),
+                "pages": validation_result.get("total_pages", "unknown"),
+                "scanned_pages": validation_result.get("scanned_pages", "unknown")
+            },
             "timestamp": time.time()
         }
     except Exception as e:
         error_msg = f"Error en el procesamiento: {str(e)}"
-        update_progress("error", -1, error_msg)
+        error_details = f"Tipo: {type(e).__name__}, Documento: {doc_id}, Archivo: {pdf_path.name}"
+        update_progress("error", -1, error_msg, error_details)
         logger.exception(f"Error procesando documento {doc_id}: {e}")
+        
+        # Proporcionar información de diagnóstico más detallada
+        diagnostic_info = {
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "document_id": doc_id,
+            "file_exists": pdf_path.exists(),
+            "file_size": pdf_path.stat().st_size if pdf_path.exists() else 0,
+            "timestamp": time.time()
+        }
+        
+        # Guardar información de diagnóstico
+        try:
+            with open(doc_dir / "error_diagnostic.json", "w") as f:
+                json.dump(diagnostic_info, f, indent=2)
+        except Exception as diag_error:
+            logger.error(f"No se pudo guardar diagnóstico: {diag_error}")
+        
         raise HTTPException(
-            status_code=500, detail=f"Error al procesar el documento: {str(e)}")
+            status_code=500, 
+            detail={
+                "error": "Error al procesar el documento",
+                "message": str(e),
+                "type": type(e).__name__,
+                "document_id": doc_id,
+                "diagnostic_saved": True
+            })
     finally:
         # Restaurar modo LLM original
         if llm_mode:
@@ -288,51 +380,235 @@ async def process_document(doc_id: str, llm_mode: Optional[str] = None):
             config.llm_mode = original_mode
 
 
-# Nuevo endpoint para obtener el progreso de procesamiento
 @app.get("/api/progress/{doc_id}")
 async def get_progress(doc_id: str):
     """
-    Obtiene el progreso del procesamiento de un documento.
+    Obtiene el progreso del procesamiento de un documento con información detallada.
 
     Args:
         doc_id: ID del documento
 
     Returns:
-        JSON con información de progreso
+        JSON con información completa de progreso y diagnóstico
     """
     doc_dir = UPLOAD_DIR / doc_id
     progress_file = doc_dir / "progress.json"
+    error_diagnostic_file = doc_dir / "error_diagnostic.json"
 
     if not doc_dir.exists():
         raise HTTPException(status_code=404, detail="Documento no encontrado")
 
+    # Información básica del documento
+    doc_info = {
+        "document_id": doc_id,
+        "directory_exists": doc_dir.exists(),
+        "pdf_exists": (doc_dir / "document.pdf").exists(),
+        "created_at": doc_dir.stat().st_ctime if doc_dir.exists() else None
+    }
+
+    # Si no hay archivo de progreso
     if not progress_file.exists():
         return {
-            "document_id": doc_id,
+            **doc_info,
             "stage": "no_iniciado",
             "progress": 0,
             "message": "Procesamiento no iniciado",
+            "details": "El documento ha sido subido pero el procesamiento no ha comenzado",
+            "status": "waiting",
             "timestamp": None
         }
 
     try:
         with open(progress_file, "r") as f:
             progress_data = json.load(f)
-        return {
-            "document_id": doc_id,
+            
+        # Agregar información adicional
+        result = {
+            **doc_info,
             **progress_data
         }
+        
+        # Si hay error, incluir información de diagnóstico
+        if progress_data.get("status") == "error" and error_diagnostic_file.exists():
+            try:
+                with open(error_diagnostic_file, "r") as f:
+                    diagnostic_data = json.load(f)
+                result["diagnostic"] = diagnostic_data
+            except Exception as e:
+                logger.error(f"Error leyendo diagnóstico para {doc_id}: {e}")
+                result["diagnostic"] = {"error": "No se pudo leer el diagnóstico"}
+        
+        # Agregar estimación de tiempo si está en progreso
+        if 0 < progress_data.get("progress", 0) < 100:
+            elapsed = time.time() - progress_data.get("timestamp", time.time())
+            if progress_data.get("progress", 0) > 0:
+                estimated_total = elapsed * (100 / progress_data.get("progress", 1))
+                estimated_remaining = max(0, estimated_total - elapsed)
+                result["time_estimate"] = {
+                    "elapsed_seconds": round(elapsed, 1),
+                    "estimated_remaining_seconds": round(estimated_remaining, 1),
+                    "estimated_total_seconds": round(estimated_total, 1)
+                }
+        
+        return result
+        
     except Exception as e:
         logger.error(f"Error leyendo progreso para {doc_id}: {e}")
         return {
-            "document_id": doc_id,
+            **doc_info,
             "stage": "error",
             "progress": -1,
             "message": "Error al leer progreso",
+            "details": f"Error del sistema: {str(e)}",
+            "status": "error",
             "timestamp": time.time()
         }
 
 
+@app.get("/api/logs/{doc_id}")
+async def get_processing_logs(doc_id: str, lines: int = 50):
+    """
+    Obtiene los logs de procesamiento de un documento específico.
+
+    Args:
+        doc_id: ID del documento
+        lines: Número de líneas de log a retornar (default: 50)
+
+    Returns:
+        JSON con los logs del procesamiento
+    """
+    doc_dir = UPLOAD_DIR / doc_id
+    
+    if not doc_dir.exists():
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+    
+    # Buscar archivos de log relacionados con este documento
+    log_entries = []
+    
+    try:
+        # Leer logs del sistema (esto es un ejemplo, en producción usarías un sistema de logs más robusto)
+        import subprocess
+        
+        # Buscar en logs del sistema por el document_id
+        try:
+            result = subprocess.run(
+                ["grep", "-n", doc_id, "/var/log/app.log"], 
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                log_entries.extend(result.stdout.strip().split('\n'))
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            # Si no hay logs del sistema, buscar en archivos locales
+            pass
+        
+        # Buscar en archivos de progreso y error
+        progress_file = doc_dir / "progress.json"
+        error_file = doc_dir / "error_diagnostic.json"
+        
+        if progress_file.exists():
+            with open(progress_file, "r") as f:
+                progress_data = json.load(f)
+                timestamp = progress_data.get("timestamp", time.time())
+                stage = progress_data.get("stage", "unknown")
+                message = progress_data.get("message", "")
+                log_entries.append(f"[{timestamp}] PROGRESS: {stage} - {message}")
+        
+        if error_file.exists():
+            with open(error_file, "r") as f:
+                error_data = json.load(f)
+                timestamp = error_data.get("timestamp", time.time())
+                error_type = error_data.get("error_type", "Unknown")
+                error_msg = error_data.get("error_message", "")
+                log_entries.append(f"[{timestamp}] ERROR: {error_type} - {error_msg}")
+        
+        # Limitar número de líneas
+        log_entries = log_entries[-lines:] if log_entries else []
+        
+        return {
+            "document_id": doc_id,
+            "log_entries": log_entries,
+            "total_entries": len(log_entries),
+            "requested_lines": lines,
+            "timestamp": time.time()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo logs para {doc_id}: {e}")
+        return {
+            "document_id": doc_id,
+            "log_entries": [f"Error obteniendo logs: {str(e)}"],
+            "total_entries": 0,
+            "requested_lines": lines,
+            "timestamp": time.time(),
+            "error": str(e)
+        }
+
+
+@app.get("/api/health")
+async def health_check():
+    """
+    Endpoint de salud del sistema con información detallada.
+    
+    Returns:
+        JSON con estado del sistema y componentes
+    """
+    try:
+        health_status = {
+            "status": "healthy",
+            "timestamp": time.time(),
+            "components": {}
+        }
+        
+        # Verificar componentes del sistema
+        components_to_check = [
+            ("storage", storage_adapter),
+            ("document_adapter", document_adapter),
+            ("upload_directory", UPLOAD_DIR)
+        ]
+        
+        for component_name, component in components_to_check:
+            try:
+                if component_name == "upload_directory":
+                    # Verificar directorio
+                    component_status = {
+                        "status": "healthy" if component.exists() else "error",
+                        "exists": component.exists(),
+                        "writable": component.exists() and component.is_dir(),
+                        "path": str(component)
+                    }
+                else:
+                    # Para otros componentes, verificar que existen
+                    component_status = {
+                        "status": "healthy" if component else "error",
+                        "available": bool(component)
+                    }
+                    
+                health_status["components"][component_name] = component_status
+                
+            except Exception as e:
+                health_status["components"][component_name] = {
+                    "status": "error",
+                    "error": str(e)
+                }
+                health_status["status"] = "degraded"
+        
+        # Verificar dependencias críticas
+        try:
+            import fitz
+            health_status["components"]["pymupdf"] = {"status": "healthy", "version": fitz.version}
+        except ImportError as e:
+            health_status["components"]["pymupdf"] = {"status": "error", "error": str(e)}
+            health_status["status"] = "degraded"
+        
+        return health_status
+        
+    except Exception as e:
+        logger.error(f"Error en health check: {e}")
+        return {
+            "status": "error",
+            "timestamp": time.time(),
+            "error": str(e)
+        }
 @app.get("/api/result/{doc_id}")
 async def get_result(doc_id: str, format: str = "markdown"):
     """
