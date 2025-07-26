@@ -11,12 +11,11 @@ except ImportError:
     fitz = None
 
 from adapters import get_language_detector
-from config import config
+from shared.constants.config import config
 from interfaces.config_menu import ConfigMenu
-from .constants import PDF_DIR
-from .helpers import show_llm_status
 from .pdf_handler import select_pdf
 from .processing import convert_pdf
+from shared.constants.directories import PDF_DIR
 
 
 def main_loop() -> None:
@@ -43,8 +42,8 @@ def main_loop() -> None:
         except ImportError:
             print("Detector de idioma:         No disponible")
 
-        print(f"Modo LLM:                   {config.llm_mode}")
-        print(f"Proveedor LLM:              {config.llm_provider}")
+        print(f"Modo LLM:                   {config.llm.mode}")
+        print(f"Proveedor LLM:              {config.llm.provider}")
         print("------------------------------------------------")
 
         print("\nOpciones disponibles:")
@@ -72,32 +71,3 @@ def handle_pdf_conversion():
         convert_pdf(PDF_DIR / pdf)
     else:
         print("\n[INFO] No se seleccionó ningún archivo")
-
-
-def show_system_info():
-    """Muestra información del sistema."""
-    print("\n=== Información del Sistema ===")
-    print("-" * 40)
-
-    # Información de directorios
-    print(f"Directorio de PDFs: {PDF_DIR}")
-    print(f"PDFs disponibles: {len(list(PDF_DIR.glob('*.pdf')))}")
-
-    # Información de módulos
-    if fitz:
-        print(f"PyMuPDF versión: {fitz.version}")
-    else:
-        print("PyMuPDF: No disponible")
-
-    try:
-        detector = get_language_detector()
-        print(
-            f"Detector de idioma: {'Disponible' if detector else 'No disponible'}")
-    except ImportError:
-        print("Detector de idioma: No disponible")
-
-    # Información de configuración
-    print(f"Modo LLM: {config.llm_mode}")
-    print(f"Proveedor LLM: {config.llm_provider}")
-
-    print("-" * 40)

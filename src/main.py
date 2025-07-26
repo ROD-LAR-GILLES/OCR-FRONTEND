@@ -3,7 +3,8 @@ from pathlib import Path
 
 from loguru import logger
 
-from config import config
+from shared.constants.config import config
+from shared.constants.directories import Directories
 from interfaces import main_loop
 
 
@@ -70,15 +71,8 @@ def _setup_logging() -> None:
 
 def _ensure_directories() -> None:
     """Asegura que existan los directorios necesarios."""
-    # Crear directorios base
-    Path("pdfs").mkdir(exist_ok=True)
-    Path("output").mkdir(exist_ok=True)
-    Path("logs").mkdir(exist_ok=True)
-
-    # Asegurar estructura de datos
-    data_path = Path("data")
-    data_path.mkdir(exist_ok=True)
-    (data_path / "cache").mkdir(exist_ok=True)  # Cache dentro de data/
+    # Usar el método centralizado para crear todos los directorios
+    Directories.ensure_all_exist()
 
 
 def _run_non_interactive_mode() -> None:

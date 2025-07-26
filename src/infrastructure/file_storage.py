@@ -17,9 +17,11 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from loguru import logger
 
-# Directorios de trabajo
-OUTPUT_DIR = Path("result")
-LOGS_DIR = Path("logs")
+# Usar directorios centralizados
+from shared.constants.directories import RESULT_DIR, LOGS_DIR
+
+# Directorios de trabajo (usando la configuración centralizada)
+OUTPUT_DIR = RESULT_DIR
 API_LOGS_DIR = LOGS_DIR / "api_calls"
 CONVERSATIONS_DIR = LOGS_DIR / "conversations"
 

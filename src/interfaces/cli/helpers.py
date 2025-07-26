@@ -2,16 +2,16 @@
 CLI Helpers - Utilidades compartidas para la interfaz CLI.
 """
 
-from config import config
+from shared.constants.config import config
 
 
 def show_llm_status() -> None:
     """Muestra el estado actual de la configuración LLM."""
-    provider = config.llm_provider
+    provider = config.llm.provider
     if not provider:
         provider = "auto"
 
-    mode = config.llm_mode
+    mode = config.llm.mode
     status = "Desactivado" if mode == "off" else f"Activado ({provider}, modo: {mode})"
     print(f"\nProcesamiento LLM: {status}")
 

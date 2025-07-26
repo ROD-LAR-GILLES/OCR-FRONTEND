@@ -1,9 +1,10 @@
 """
 Constantes globales para la aplicación CLI.
+
+DEPRECADO: Las constantes de directorios se han movido a shared.constants.directories
 """
 
-from pathlib import Path
+from shared.constants.directories import PDF_DIR
 
-# Directorio de PDFs
-PDF_DIR = Path("pdfs")
-PDF_DIR.mkdir(exist_ok=True)
+# Re-exportar para compatibilidad hacia atrás
+__all__ = ['PDF_DIR']
