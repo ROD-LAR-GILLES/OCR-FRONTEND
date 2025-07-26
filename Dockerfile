@@ -44,9 +44,6 @@ RUN mkdir -p data/corrections \
             pdfs \
             result \
             logs \
-            cache \
-            output \
-            static
 
 COPY --from=builder /install /usr/local
 
