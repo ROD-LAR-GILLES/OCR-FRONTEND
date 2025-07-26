@@ -1,6 +1,14 @@
 """
-Main Menu - Menú principal de la interfaz CLI.
+Menú Principal CLI - Lógica de navegación y menú principal.
 """
+
+from typing import Optional
+from loguru import logger
+import sys
+from pathlib import Path
+
+from . import list_pdfs, select_pdf, convert_pdf, show_cache_stats, show_llm_status
+from .config import PDF_DIR
 
 import sys
 from interfaces.config_menu import ConfigMenu

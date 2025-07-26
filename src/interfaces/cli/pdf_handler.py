@@ -1,10 +1,10 @@
 """
-PDF Handler - Gestión y selección de archivos PDF.
+Gestión de PDFs - Funciones para listar y seleccionar archivos PDF.
 """
 
-from pathlib import Path
 from typing import List, Optional
-from . import PDF_DIR
+from pathlib import Path
+from .config import PDF_DIR
 
 
 def list_pdfs() -> List[str]:

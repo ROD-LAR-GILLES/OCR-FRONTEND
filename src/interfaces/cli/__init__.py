@@ -14,11 +14,7 @@ from .cache_manager import show_cache_stats
 from .processing import convert_pdf
 from .pdf_handler import list_pdfs, select_pdf
 from .menu import main_loop
-from pathlib import Path
-
-# Configuración común
-PDF_DIR = Path("pdfs")
-PDF_DIR.mkdir(exist_ok=True)
+from .config import PDF_DIR
 
 # Importar componentes principales para fácil acceso
 
