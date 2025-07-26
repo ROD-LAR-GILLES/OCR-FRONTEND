@@ -77,8 +77,10 @@ class ConfigMenu:
             if provider:  # Ignorar None para la opción Volver
                 try:
                     # Usar el servicio de configuración para actualizar el proveedor
-                    provider_config = config.get_llm_provider_config(provider) if provider != "off" else {}
-                    self.config_service.update_llm_provider(provider, provider_config)
+                    provider_config = config.get_llm_provider_config(
+                        provider) if provider != "off" else {}
+                    self.config_service.update_llm_provider(
+                        provider, provider_config)
                     print(f"\nProveedor establecido a: {provider}")
                 except Exception as e:
                     print(f"[ERROR] No se pudo configurar el proveedor: {e}")
@@ -105,9 +107,11 @@ class ConfigMenu:
                     # Usar el servicio de configuración para actualizar el modo
                     current_config = self.config_service.get_llm_configuration()
                     provider = current_config.get('provider', 'off')
-                    provider_config = config.get_llm_provider_config(provider) if provider != "off" else {}
+                    provider_config = config.get_llm_provider_config(
+                        provider) if provider != "off" else {}
                     provider_config['mode'] = mode
-                    self.config_service.update_llm_provider(provider, provider_config)
+                    self.config_service.update_llm_provider(
+                        provider, provider_config)
                     print(f"\nModo establecido a: {mode}")
                 except Exception as e:
                     print(f"[ERROR] No se pudo configurar el modo: {e}")
