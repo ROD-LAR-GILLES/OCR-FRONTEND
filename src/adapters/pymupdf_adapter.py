@@ -9,7 +9,7 @@ serving as a bridge between domain logic and external libraries.
 """
 
 from __future__ import annotations
-import adapters.ocr_adapter as ocr_adapter
+from . import ocr_adapter
 from loguru import logger
 from PIL import Image
 import fitz
@@ -17,7 +17,7 @@ import fitz
 import io
 from pathlib import Path
 from typing import List
-import adapters.parallel_ocr as parallel_ocr
+from . import parallel_ocr
 import os
 import config.state as state
 from adapters.llm_refiner import LLMRefiner
