@@ -33,29 +33,32 @@ LOGS_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOGS_DIR / f"ocr_{datetime.now().strftime('%Y%m%d')}.log"
 
 # Configurar loguru usando la configuración centralizada
+
+
 def setup_logging():
     """Configura el sistema de logging usando la configuración centralizada."""
     if 'logger' in globals() and hasattr(logger, 'remove'):
         # Solo configurar si loguru está disponible
         logger.remove()  # Eliminar handler por defecto
-        
+
         log_config = config.logging
-        
+
         # Configuración para consola
         logger.add(
-            sys.stderr, 
-            format=LOG_FORMAT, 
+            sys.stderr,
+            format=LOG_FORMAT,
             level=log_config.level
         )
-        
+
         # Configuración para archivo
         logger.add(
-            LOG_FILE, 
+            LOG_FILE,
             rotation=log_config.max_file_size,
             retention=f"{log_config.backup_count} days",
-            level=log_config.level, 
+            level=log_config.level,
             format=LOG_FORMAT
         )
+
 
 # Configurar al importar
 setup_logging()
