@@ -43,7 +43,7 @@ WORKDIR /app
 RUN mkdir -p data/corrections \
             pdfs \
             result \
-            logs \
+            logs
 
 COPY --from=builder /install /usr/local
 
