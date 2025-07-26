@@ -31,7 +31,7 @@ def show_progress(step: str, current: int, total: int, message: str):
 def print_success_summary(output_path, content_length, validation_result):
     """Imprime un resumen exitoso del procesamiento."""
     print("\n" + "=" * 60)
-    print("🎉 PROCESAMIENTO COMPLETADO EXITOSAMENTE")
+    print(" PROCESAMIENTO COMPLETADO EXITOSAMENTE")
     print("=" * 60)
     print(f"✓ Archivo generado: {output_path}")
     print(f"✓ Tamaño del contenido: {content_length} caracteres")
