@@ -12,13 +12,14 @@ from . import app
 def start_api():
     """Inicia el servidor API usando la configuración centralizada."""
     api_config = config.api
-    logger.info(f"Iniciando servidor API en {api_config.host}:{api_config.port}")
-    
+    logger.info(
+        f"Iniciando servidor API en {api_config.host}:{api_config.port}")
+
     try:
         uvicorn.run(
-            app, 
-            host=api_config.host, 
-            port=api_config.port, 
+            app,
+            host=api_config.host,
+            port=api_config.port,
             log_level="info",
             debug=api_config.debug
         )
