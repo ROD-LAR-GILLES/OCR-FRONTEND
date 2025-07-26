@@ -56,19 +56,19 @@ def main():
 
     try:
         if args.mode == "cli":
-            print("🚀 Iniciando aplicación CLI...")
+            print(" Iniciando aplicación CLI...")
             cli_app = create_cli_application()
             cli_app()
         elif args.mode == "api":
-            print(f"🌐 Iniciando servidor API en {args.host}:{args.port}...")
+            print(f" Iniciando servidor API en {args.host}:{args.port}...")
             api_app = create_api_application()
             api_app(host=args.host, port=args.port)
 
     except KeyboardInterrupt:
-        print("\n\n👋 Aplicación terminada por el usuario.")
+        print("\n\n Aplicación terminada por el usuario.")
         sys.exit(0)
     except Exception as e:
-        print(f"❌ Error inesperado: {e}")
+        print(f" Error inesperado: {e}")
         sys.exit(1)
 
 
