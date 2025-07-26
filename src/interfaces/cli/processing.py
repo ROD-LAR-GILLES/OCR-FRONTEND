@@ -23,7 +23,7 @@ container = DependencyContainer()
 def convert_pdf(pdf_path: Path) -> None:
     """
     Convierte un PDF a Markdown usando los casos de uso del dominio.
-    
+
     Args:
         pdf_path: Ruta al archivo PDF a procesar
     """
@@ -41,7 +41,8 @@ def convert_pdf(pdf_path: Path) -> None:
         output_path = _save_result_step(pdf_path, markdown_content)
 
         # Mostrar resumen de éxito
-        print_success_summary(output_path, len(markdown_content), validation_result)
+        print_success_summary(output_path, len(
+            markdown_content), validation_result)
 
     except Exception as e:
         logger.exception("Error en la conversión de PDF")
@@ -112,7 +113,7 @@ def _extract_content_step(pdf_path: Path) -> str:
     # Obtener caso de uso del contenedor
     pdf_to_markdown_use_case = container.get_pdf_to_markdown_use_case()
     markdown_content = pdf_to_markdown_use_case.execute(pdf_path)
-    
+
     show_progress("Extrayendo", 3, 4, "Extracción completada")
 
     if len(markdown_content) > 1000:

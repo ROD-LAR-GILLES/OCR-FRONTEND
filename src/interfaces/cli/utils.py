@@ -78,7 +78,7 @@ CLI_PDF_DIR = PDF_DIR  # Alias para compatibilidad hacia atrás
 
 __all__ = [
     'show_llm_status',
-    'show_progress', 
+    'show_progress',
     'print_success_summary',
     'print_error_details',
     'CLI_PDF_DIR'

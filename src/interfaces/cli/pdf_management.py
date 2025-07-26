@@ -61,7 +61,7 @@ class PDFManager:
 
         try:
             stat = pdf_path.stat()
-            
+
             # Información básica del archivo
             info = {
                 "name": pdf_name,
@@ -71,7 +71,7 @@ class PDFManager:
                 "readable": pdf_path.is_file(),
                 "error": None
             }
-            
+
             # Información del documento PDF si está disponible
             if fitz:
                 try:
@@ -83,13 +83,14 @@ class PDFManager:
                             "subject": doc.metadata.get("subject", ""),
                             "creator": doc.metadata.get("creator", ""),
                             "is_encrypted": doc.needs_pass,
-                            "has_text": any(page.get_text() for page in doc[:3])  # Verificar primeras 3 páginas
+                            # Verificar primeras 3 páginas
+                            "has_text": any(page.get_text() for page in doc[:3])
                         })
                 except Exception as e:
                     info["pdf_error"] = f"Error leyendo PDF: {e}"
-            
+
             return info
-            
+
         except Exception as e:
             return {
                 "name": pdf_name,
@@ -131,7 +132,7 @@ class PDFManager:
         pdfs = self.list_pdfs()
         total_size = 0
         valid_pdfs = 0
-        
+
         for pdf in pdfs:
             info = self.get_pdf_info(pdf)
             if info['exists']:
@@ -151,13 +152,17 @@ class PDFManager:
 pdf_manager = PDFManager()
 
 # Funciones de compatibilidad hacia atrás
+
+
 def list_pdfs() -> List[str]:
     """Lista los PDFs disponibles (función de compatibilidad)."""
     return pdf_manager.list_pdfs()
 
+
 def select_pdf() -> Optional[str]:
     """Selecciona un PDF del menú (función de compatibilidad)."""
     return pdf_manager.select_pdf()
+
 
 def get_pdf_info(pdf_name: str) -> Dict[str, Any]:
     """Obtiene información de un PDF (función de compatibilidad)."""

@@ -30,7 +30,8 @@ def main_loop() -> None:
         pdf_stats = pdf_manager.get_directory_stats()
         print(f"PDFs disponibles:           {pdf_stats['total_files']}")
         print(f"PDFs válidos:               {pdf_stats['valid_pdfs']}")
-        print(f"Tamaño total:               {pdf_stats['total_size_mb']:.1f} MB")
+        print(
+            f"Tamaño total:               {pdf_stats['total_size_mb']:.1f} MB")
 
         if fitz:
             print(f"PyMuPDF versión:           {fitz.version}")
