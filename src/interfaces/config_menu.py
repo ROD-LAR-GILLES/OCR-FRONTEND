@@ -12,14 +12,16 @@ class ConfigMenu:
         "1": ("Sin procesamiento LLM", "off"),
         "2": ("OpenAI GPT", "openai"),
         "3": ("Google Gemini", "gemini"),
-        "4": ("Automático (mejor disponible)", "auto")
+        "4": ("Automático (mejor disponible)", "auto"),
+        "5": ("Volver", None)
     }
 
     MODES = {
         "1": ("Desactivado", "off"),
         "2": ("Sólo resumen", "summary"),
         "3": ("Mejora completa", "full"),
-        "4": ("Análisis legal", "legal")
+        "4": ("Análisis legal", "legal"),
+        "5": ("Volver", None)
     }
 
     @classmethod
@@ -35,11 +37,11 @@ class ConfigMenu:
             print("\nOpciones:")
             print("1. Cambiar proveedor LLM")
             print("2. Cambiar modo LLM")
-            print("0. Volver al menú principal")
+            print("3. Volver al menú principal")
 
-            choice = input("\nSeleccione una opción (0-2): ").strip()
+            choice = input("\nSeleccione una opción (1-3): ").strip()
 
-            if choice == "0":
+            if choice == "3":
                 break
             elif choice == "1":
                 cls._change_provider()
@@ -57,14 +59,17 @@ class ConfigMenu:
         for key, (name, _) in cls.PROVIDERS.items():
             print(f"{key}. {name}")
 
-        choice = input("\nSeleccione un proveedor: ").strip()
+        choice = input("\nSeleccione un proveedor (1-5): ").strip()
 
-        if choice in cls.PROVIDERS:
+        if choice == "5":
+            return
+        elif choice in cls.PROVIDERS:
             _, provider = cls.PROVIDERS[choice]
-            config.llm_provider = provider
-            print(f"\nProveedor establecido a: {provider}")
+            if provider:  # Ignorar None para la opción Volver
+                config.llm_provider = provider
+                print(f"\nProveedor establecido a: {provider}")
         else:
-            print("Opción inválida.")
+            print("[ERROR] Opción inválida.")
 
     @classmethod
     def _change_mode(cls) -> None:
@@ -74,12 +79,16 @@ class ConfigMenu:
 
         for key, (name, _) in cls.MODES.items():
             print(f"{key}. {name}")
+        print("5. Volver")
 
-        choice = input("\nSeleccione un modo: ").strip()
+        choice = input("\nSeleccione un modo (1-5): ").strip()
 
-        if choice in cls.MODES:
+        if choice == "5":
+            return
+        elif choice in cls.MODES:
             _, mode = cls.MODES[choice]
-            config.llm_mode = mode
-            print(f"\nModo establecido a: {mode}")
+            if mode:  # Ignorar None para la opción Volver
+                config.llm_mode = mode
+                print(f"\nModo establecido a: {mode}")
         else:
-            print("Opción inválida.")
+            print("[ERROR] Opción inválida.")

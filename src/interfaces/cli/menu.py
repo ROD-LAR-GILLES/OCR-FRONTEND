@@ -23,14 +23,36 @@ def main_loop() -> None:
     """Bucle principal del menú con configuración LLM integrada."""
     while True:
         print("\n=== OCR-PYMUPDF ===")
-        show_llm_status()
+
+        # Mostrar información del sistema siempre
+        print("\n----------- Información del Sistema ------------")
+        print("------------------------------------------------")
+        print(f"Directorio de PDFs:         {PDF_DIR}")
+        print(
+            f"PDFs disponibles:           {len(list(PDF_DIR.glob('*.pdf')))}")
+
+        if fitz:
+            print(f"PyMuPDF versión:           {fitz.version}")
+        else:
+            print("PyMuPDF:                   No disponible")
+
+        try:
+            detector = get_language_detector()
+            print(
+                f"Detector de idioma:         {'Disponible' if detector else 'No disponible'}")
+        except ImportError:
+            print("Detector de idioma:         No disponible")
+
+        print(f"Modo LLM:                   {config.llm_mode}")
+        print(f"Proveedor LLM:              {config.llm_provider}")
+        print("------------------------------------------------")
+
         print("\nOpciones disponibles:")
         print("1. Convertir PDF a Markdown")
         print("2. Configuración")
-        print("3. Información del sistema")
-        print("4. Salir")
+        print("3. Salir")
 
-        choice = input("\nSeleccione una opción (1-4): ").strip()
+        choice = input("\nSeleccione una opción (1-3): ").strip()
 
         match choice:
             case "1":
@@ -38,8 +60,6 @@ def main_loop() -> None:
             case "2":
                 ConfigMenu.show_provider_menu()
             case "3":
-                show_system_info()
-            case "4":
                 print("\n¡Hasta luego!")
                 sys.exit(0)
             case _:
