@@ -1,20 +1,18 @@
 """
 Endpoints principales de la API REST.
 """
-from config import config
-from infrastructure.document_adapter import DocumentAdapter
-from infrastructure.storage_adapter import StorageAdapter
-from fastapi import HTTPException, File, UploadFile
-from pathlib import Path
-import uuid
 import json
-import time
 import shutil
+import time
+import uuid
+from pathlib import Path
 
-from infrastructure.logging_setup import logger
+from fastapi import File, HTTPException, UploadFile
+
 from domain.use_cases.validate_pdf import ValidatePDFUseCase
-from . import app, UPLOAD_DIR
-from .adapters import storage_adapter, document_adapter
+from infrastructure.logging_setup import logger
+from . import UPLOAD_DIR, app
+from .adapters import document_adapter, storage_adapter
 
 
 @app.get("/")

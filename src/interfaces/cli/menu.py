@@ -4,14 +4,11 @@ Menú Principal CLI - Lógica de navegación y menú principal.
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 try:
     import fitz
 except ImportError:
     fitz = None
-
-from loguru import logger
 
 from adapters import get_language_detector
 from config import config
