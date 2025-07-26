@@ -83,5 +83,3 @@ class ConfigMenu:
             print(f"\nModo establecido a: {mode}")
         else:
             print("Opción inválida.")
-
-
