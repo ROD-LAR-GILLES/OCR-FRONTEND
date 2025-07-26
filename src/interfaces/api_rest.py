@@ -29,6 +29,7 @@ from domain.use_cases.validate_pdf import ValidatePDFUseCase
 # Importaciones de infraestructura
 from infrastructure.logging_setup import logger
 from infrastructure.storage_adapter import StorageAdapter
+from infrastructure.document_adapter import DocumentAdapter
 
 # Configuración
 from config import config
@@ -55,6 +56,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 # Adapters
 storage_adapter = StorageAdapter()
+document_adapter = DocumentAdapter()
 
 # Montar directorio estático para la interfaz web
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -173,7 +175,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     logger.info(f"Iniciando validación del PDF: {doc_id}")
     try:
         validate_pdf_use_case = ValidatePDFUseCase(
-            document_port=None)  # TODO: Implementar DocumentPort
+            document_port=document_adapter)
         validation_result = validate_pdf_use_case.execute(pdf_path)
         logger.info(f"Validación completada para documento: {doc_id}")
 

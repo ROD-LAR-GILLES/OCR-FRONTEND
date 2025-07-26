@@ -25,6 +25,7 @@ from adapters import LLMProviderFactory, get_language_detector
 # Importaciones de infraestructura
 from infrastructure import logger, ocr_cache
 from infrastructure.storage_adapter import StorageAdapter
+from infrastructure.document_adapter import DocumentAdapter
 
 # Importaciones de configuración
 from interfaces.config_menu import ConfigMenu
@@ -33,6 +34,7 @@ from config import config
 # ───────────────────────── Inicialización ──────────────────────────
 # Crear instancias necesarias
 storage_adapter = StorageAdapter()
+document_adapter = DocumentAdapter()
 
 # ───────────────────────── Helpers ──────────────────────────
 
@@ -63,7 +65,7 @@ def _convert_pdf(pdf_path: Path) -> None:
         # Paso 1: Validar el PDF
         print("Paso 1/4: Validando PDF...")
         validate_pdf_use_case = ValidatePDFUseCase(
-            document_port=None)  # TODO: Implementar DocumentPort
+            document_port=document_adapter)
         validation_result = validate_pdf_use_case.execute(pdf_path)
 
         if not validation_result["valid"]:
@@ -78,7 +80,7 @@ def _convert_pdf(pdf_path: Path) -> None:
         # Paso 2: Preparar procesamiento
         print("\nPaso 2/4: Preparando procesamiento...")
         pdf_to_markdown_use_case = PDFToMarkdownUseCase(
-            document_port=None,  # TODO: Implementar DocumentPort
+            document_port=document_adapter,
             storage_port=storage_adapter,
             llm_port=None  # TODO: Implementar LLMPort
         )
@@ -240,7 +242,7 @@ def main_loop() -> None:
                     try:
                         print("Analizando estructura del documento...")
                         validate_pdf_use_case = ValidatePDFUseCase(
-                            document_port=None)
+                            document_port=document_adapter)
                         result = validate_pdf_use_case.execute(PDF_DIR / pdf)
 
                         print("\n=== Resultados de validación ===")
