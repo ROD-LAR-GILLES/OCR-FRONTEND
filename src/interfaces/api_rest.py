@@ -1,20 +1,13 @@
 """
-API REST para el sistema OCR-FRONTEND.
+Entry point for the OCR-FRONTEND API.
 
-Este módulo proporciona una API REST para el sistema OCR-FRONTEND,
-permitiendo el procesamiento de documentos PDF a través de una interfaz HTTP.
-
-Características:
-- Endpoint para cargar y procesar PDFs
-- Endpoint para obtener resultados en formato Markdown o JSON
-- Soporte para autenticación JWT
-- Documentación automática con Swagger/OpenAPI
+Este módulo sirve como punto de entrada para iniciar el servidor API.
+La funcionalidad principal se ha movido a los módulos específicos en el paquete api/.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, status
-from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+from infrastructure.logging_setup import logger
+from .api import app
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 import uuid
