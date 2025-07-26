@@ -96,13 +96,15 @@ class ValidatePDFUseCase:
             if valid:
                 messages.append("Documento válido para procesamiento")
                 if scanned_pages > 0:
-                    messages.append(f"Contiene {scanned_pages} página(s) escaneada(s) que requieren OCR")
+                    messages.append(
+                        f"Contiene {scanned_pages} página(s) escaneada(s) que requieren OCR")
                 if digital_pages > 0:
-                    messages.append(f"Contiene {digital_pages} página(s) con texto digital")
+                    messages.append(
+                        f"Contiene {digital_pages} página(s) con texto digital")
 
             # Agregar información detallada sobre el documento
             file_size_mb = pdf_path.stat().st_size / (1024 * 1024) if pdf_path.exists() else 0
-            
+
             return {
                 "valid": valid,
                 "total_pages": total_pages,
