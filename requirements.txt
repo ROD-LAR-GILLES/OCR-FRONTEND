@@ -25,11 +25,6 @@ symspellpy>=6.7.0        		# Corrección ortográfica de alto rendimiento
 # ───── Detección de Idiomas ─────
 fasttext>=0.9.2          		# Detección de idiomas mediante embeddings
 
-# ───── API REST (Opcional) ─────
-fastapi>=0.110.0         		# Framework API REST de alto rendimiento
-uvicorn>=0.27.0          		# Servidor ASGI para despliegue de FastAPI
-python-multipart>=0.0.6  		# Manejo de formularios y archivos en FastAPI
-
 # ───── Utilidades ─────
 markdown2>=2.4.10        		# Conversión de texto a formato Markdown
 pydantic>=2.5.0          		# Validación de datos y serialización

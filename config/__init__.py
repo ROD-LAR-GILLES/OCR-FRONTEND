@@ -1,14 +1,28 @@
 """
-Gestión centralizada de configuración.
+Gestión centralizada de configuración. (MÓDULO DE COMPATIBILIDAD)
 
-Este módulo implementa un sistema unificado de configuración que elimina
-la duplicación entre múltiples módulos de configuración existentes.
+DEPRECATED:
+    Este directorio config/ está siendo reemplazado gradualmente por
+    src/shared/constants/config.py que implementa la nueva arquitectura.
+    
+    Por favor, use src.shared.constants.config.AppConfig para nueva funcionalidad.
+    Ver docs/MIGRATION.md para información sobre el proceso de migración.
+
+Este módulo se mantiene temporalmente para compatibilidad con código existente.
 """
+import warnings
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
+
+# Emitir advertencia de deprecación
+warnings.warn(
+    "El directorio config/ está obsoleto y será eliminado en futuras versiones. "
+    "Use src.shared.constants.config.AppConfig en su lugar.",
+    DeprecationWarning, stacklevel=2
+)
 
 # Cargar variables de entorno
 load_dotenv()
@@ -57,7 +71,7 @@ class APIConfig:
     host: str = os.getenv('API_HOST', '127.0.0.1')
     port: int = int(os.getenv('API_PORT', '8000'))
     debug: bool = os.getenv('API_DEBUG', 'false').lower() == 'true'
-    cors_origins: List[str] = field(
+    cors_origins: list = field(
         default_factory=lambda: os.getenv('CORS_ORIGINS', '*').split(','))
 
 
@@ -135,18 +149,6 @@ class AppConfig:
             )
 
         return validation
-
-    # Propiedad de compatibilidad para código antiguo
-    @property
-    def language(self):
-        """Propiedad de compatibilidad para código antiguo que accede a config.language"""
-        return {
-            "default_language": self.ocr.language,
-            "min_confidence": 0.7,
-            "use_fasttext": True,
-            "fasttext_model_path": "data/models/fasttext/lid.176.ftz",
-            "supported_languages": ["es", "en", "zh", "fr", "de"]
-        }
 
 
 # Instancia global de configuración

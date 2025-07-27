@@ -194,13 +194,13 @@ class ErrorHandler:
             str: Mensaje formateado
         """
         severity_symbols = {
-            ErrorSeverity.LOW: "ℹ️",
-            ErrorSeverity.MEDIUM: "⚠️",
-            ErrorSeverity.HIGH: "❌",
-            ErrorSeverity.CRITICAL: "🚨"
+            ErrorSeverity.LOW: "INFO",
+            ErrorSeverity.MEDIUM: "WARN",
+            ErrorSeverity.HIGH: "ERROR",
+            ErrorSeverity.CRITICAL: "CRITICAL"
         }
 
-        symbol = severity_symbols.get(error.severity, "❓")
+        symbol = severity_symbols.get(error.severity, "UNKNOWN")
         operation_info = f" ({error.context.operation})" if error.context.operation else ""
 
         return f"{symbol} {error.message}{operation_info}"
