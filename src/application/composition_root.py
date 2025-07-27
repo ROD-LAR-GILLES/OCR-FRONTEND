@@ -183,20 +183,6 @@ class CompositionRoot:
             configuration_service=self.container.configuration_service
         )
 
-    def create_api_application(self):
-        """
-        Crea la aplicación API con todas las dependencias inyectadas.
-
-        Returns:
-            Función start_api configurada con dependencias
-        """
-        from interfaces.api.server import start_api
-
-        # Inyectar dependencias en la API
-        return lambda: start_api(
-            dependency_container=self.container
-        )
-
     def get_use_case(self, use_case_name: str):
         """
         Obtiene un caso de uso específico por nombre.
