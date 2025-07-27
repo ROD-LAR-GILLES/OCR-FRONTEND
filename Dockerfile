@@ -35,7 +35,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app:/app/src:/app/config
 
 WORKDIR /app
 
@@ -49,12 +49,19 @@ COPY --from=builder /install /usr/local
 
 COPY app.py .
 COPY src/ src/
+COPY config/ config/
 COPY data/ data/
 COPY pdfs/ pdfs/
 COPY result/ result/
 
+# Crear usuario no-root
+RUN groupadd -r ocruser && useradd -r -g ocruser -d /app ocruser
+
 # Asegurar permisos de escritura y ownership
-RUN chown -R 1000:1000 /app/data && \
-    chmod -R 777 /app/data
+RUN chown -R ocruser:ocruser /app/data /app/pdfs /app/result /app/logs && \
+    chmod -R 755 /app/data /app/pdfs /app/result /app/logs
+
+# Cambiar al usuario no-root
+USER ocruser
 
 CMD ["python", "app.py", "--mode", "cli"]

@@ -3,19 +3,16 @@
 Punto de entrada unificado para la aplicación OCR-FRONTEND.
 Respeta la arquitectura hexagonal mediante composition root mejorado.
 """
-from application.composition_root import DependencyContainer
-from shared.constants.directories import Directories
-from infrastructure.logging_setup import logger
-import sys
+from src.application.composition_root import DependencyContainer
+from src.shared.constants.directories import Directories
+from src.infrastructure.logging_setup import logger
 import time
-from pathlib import Path
-import argparse
 import json
+import sys
+from pathlib import Path
 
-# Agregar src al path
+# AÑADIR src AL PATH ANTES DE CUALQUIER IMPORT DEL PROYECTO
 sys.path.insert(0, str(Path(__file__).parent / "src"))
-
-# Importar después de configurar el path
 
 
 def create_cli_application():
@@ -30,24 +27,8 @@ def create_cli_application():
     container = DependencyContainer()
 
     # Importar y retornar la función principal
-    from interfaces.cli import main_loop
+    from src.interfaces.cli import main_loop
     return main_loop
-
-
-def create_api_application():
-    """
-    Composition root para la aplicación API REST.
-    Inyecta todas las dependencias necesarias usando el contenedor.
-    """
-    # Asegurar que los directorios existen
-    Directories.ensure_all_exist()
-
-    # Crear contenedor de dependencias
-    container = DependencyContainer()
-
-    # Importar función de inicio API
-    from interfaces.api_rest import start_api
-    return start_api
 
 
 def cleanup_temp_files():
@@ -60,7 +41,7 @@ def cleanup_temp_files():
     - Limpia archivos de caché antiguos
     """
     try:
-        from shared.constants.directories import UPLOAD_DIR, CACHE_DIR
+        from src.shared.constants.directories import UPLOAD_DIR, CACHE_DIR
         # Directorios a revisar
         dirs_to_check = [
             Path("uploads"),
@@ -123,43 +104,15 @@ def cleanup_temp_files():
 
 
 def main():
-    """Punto de entrada principal con selección de modo."""
-    parser = argparse.ArgumentParser(
-        description="OCR-FRONTEND: Sistema de procesamiento OCR con arquitectura hexagonal"
-    )
-    parser.add_argument(
-        "--mode",
-        choices=["cli", "api"],
-        default="cli",
-        help="Modo de ejecución: cli (interfaz de línea de comandos) o api (servidor REST)"
-    )
-    parser.add_argument(
-        "--host",
-        default="0.0.0.0",
-        help="Host para el servidor API (solo en modo api)"
-    )
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8000,
-        help="Puerto para el servidor API (solo en modo api)"
-    )
-
-    args = parser.parse_args()
-
+    """Punto de entrada principal."""
     try:
         # Limpiar archivos temporales al inicio
         print(" Limpiando archivos temporales...")
         cleanup_temp_files()
 
-        if args.mode == "cli":
-            print(" Iniciando aplicación CLI...")
-            cli_app = create_cli_application()
-            cli_app()
-        elif args.mode == "api":
-            print(f" Iniciando servidor API en {args.host}:{args.port}...")
-            api_app = create_api_application()
-            api_app(host=args.host, port=args.port)
+        print(" Iniciando aplicación CLI...")
+        cli_app = create_cli_application()
+        cli_app()
 
     except KeyboardInterrupt:
         print("\n\n Aplicación terminada por el usuario.")

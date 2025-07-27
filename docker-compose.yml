@@ -11,9 +11,11 @@ services:
       - ./cache:/app/cache
       - ./output:/app/output
       - ./static:/app/static
+      - ./config:/app/config
+      - ./uploads:/app/uploads
     stdin_open: true
     tty: true
     env_file:
       - .env
     environment:
-      - PYTHONPATH=/app/src
+      - PYTHONPATH=/app:/app/src
