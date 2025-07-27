@@ -5,14 +5,17 @@ Este módulo implementa el patrón Factory para crear instancias
 de diferentes proveedores LLM basados en la configuración.
 """
 
+from adapters.providers.gemini_provider import GeminiProvider
+from adapters.providers.openai_provider import OpenAIProvider
 from typing import Dict, Any, Optional, Type
 from domain.ports.llm_provider import LLMProvider
-from config.api_settings import load_api_settings
+from shared.constants.config import AppConfig
 from infrastructure.logging_setup import logger
 
+# Instancia de configuración
+app_config = AppConfig()
+
 # Importaciones adelantadas para mejorar rendimiento
-from adapters.providers.openai_provider import OpenAIProvider
-from adapters.providers.gemini_provider import GeminiProvider
 
 
 class LLMProviderFactory:
@@ -46,7 +49,19 @@ class LLMProviderFactory:
                 return cls._provider_cache[provider_type]
 
             # Cargar configuración
-            api_config = load_api_settings()
+            api_config = {
+                "openai": {
+                    "api_key": app_config.openai.api_key,
+                    "org_id": app_config.openai.org_id,
+                    "model": app_config.openai.model,
+                    "max_retries": app_config.openai.max_retries
+                },
+                "gemini": {
+                    "api_key": app_config.gemini.api_key,
+                    "model": app_config.gemini.model,
+                    "max_retries": app_config.gemini.max_retries
+                }
+            }
 
             # Determinar proveedor automáticamente si no se especifica
             if not provider_type:

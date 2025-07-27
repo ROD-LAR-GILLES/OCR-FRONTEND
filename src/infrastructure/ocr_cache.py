@@ -16,7 +16,7 @@ from datetime import datetime
 from PIL import Image
 import numpy as np
 from loguru import logger
-from config import config
+from shared.constants.config import AppConfig
 
 # Ruta de la base de datos SQLite para caché persistente
 CACHE_DB_PATH = Path("data/cache/ocr_cache.db")
@@ -64,19 +64,19 @@ class OCRCache:
             image: Imagen PIL a hashear
 
         Returns:
-            str: Hash MD5 hexadecimal de la imagen
+            str: Hash BLAKE2b hexadecimal de la imagen (más seguro que MD5)
         """
         # Convertir a escala de grises y reducir resolución para mejor comparación
         img_small = image.convert('L').resize((100, 100))
         img_array = np.array(img_small)
-        return hashlib.md5(img_array.tobytes()).hexdigest()
+        return hashlib.blake2b(img_array.tobytes(), digest_size=32).hexdigest()
 
     def get_cached_ocr_result(self, image_hash: str) -> Optional[Dict[str, Any]]:
         """
         Obtiene resultado OCR cacheado por hash de imagen.
 
         Args:
-            image_hash: Hash MD5 de la imagen
+            image_hash: Hash BLAKE2b de la imagen
 
         Returns:
             Dict o None: Resultados del OCR si existe en caché, None si no existe
@@ -138,7 +138,7 @@ class OCRCache:
         Guarda un resultado OCR en la caché.
 
         Args:
-            image_hash: Hash MD5 de la imagen
+            image_hash: Hash BLAKE2b de la imagen
             text: Texto extraído por OCR
             confidence: Nivel de confianza (0-1)
             language: Código ISO del idioma detectado
@@ -246,6 +246,25 @@ class OCRCache:
             logger.error(
                 f"Error al obtener estadísticas de caché OCR: {str(e)}")
             return {"error": str(e)}
+
+    def vacuum_database(self) -> bool:
+        """
+        Optimiza la base de datos SQLite eliminando espacio no utilizado.
+
+        Returns:
+            bool: True si se optimizó correctamente, False en caso contrario
+        """
+        try:
+            conn = sqlite3.connect(str(CACHE_DB_PATH))
+            conn.execute("VACUUM")
+            conn.commit()
+            conn.close()
+            logger.info("Base de datos de caché OCR optimizada correctamente")
+            return True
+        except Exception as e:
+            logger.error(
+                f"Error al optimizar base de datos de caché OCR: {str(e)}")
+            return False
 
 
 # Instancia global para uso en toda la aplicación

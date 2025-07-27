@@ -9,7 +9,10 @@ from pathlib import Path
 import os
 from typing import Optional
 from loguru import logger
-from config import config as app_config
+from shared.constants.config import AppConfig
+
+# Instancia de configuración
+app_config = AppConfig()
 
 
 class FastTextLanguageDetector:

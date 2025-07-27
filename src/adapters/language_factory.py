@@ -5,11 +5,14 @@ Este módulo proporciona una fábrica para crear detectores de idiomas
 según la configuración del sistema. Soporta múltiples estrategias
 de detección, desde la más simple a la más avanzada.
 """
+from src.adapters.language_detector import LanguageDetector
+from config.language_detection import SimpleLanguageDetector
 from typing import Dict, Type, Optional
 from loguru import logger
-from config import config as app_config
-from config.language_detection import SimpleLanguageDetector
-from src.adapters.language_detector import LanguageDetector
+from shared.constants.config import AppConfig
+
+# Instancia de configuración
+app_config = AppConfig()
 
 # Importación condicional para evitar errores si FastText no está disponible
 try:

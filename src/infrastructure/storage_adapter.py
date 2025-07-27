@@ -9,7 +9,10 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from domain.ports.storage_port import StoragePort
-from config import config
+from shared.constants.config import AppConfig
+
+# Instancia de configuración
+app_config = AppConfig()
 
 logger = logging.getLogger(__name__)
 

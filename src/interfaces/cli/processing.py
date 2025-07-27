@@ -7,8 +7,6 @@ from pathlib import Path
 
 # Importaciones de la aplicación
 from application.composition_root import DependencyContainer
-from application.use_cases.pdf_to_markdown import PDFToMarkdownUseCase
-from application.use_cases.validate_pdf import ValidatePDFUseCase
 
 # Importaciones de infraestructura
 from infrastructure.logging_setup import logger
@@ -61,22 +59,7 @@ def _validate_pdf_step(pdf_path: Path) -> dict:
     validation_result = validate_pdf_use_case.execute(pdf_path)
     show_progress("Validando PDF", 1, 4, "Validación completada")
 
-
-def _validate_pdf_step(pdf_path: Path) -> dict:
-    """Ejecuta el paso de validación del PDF."""
-    show_progress("Validando PDF", 0, 4, "Iniciando validación...")
-
-    validate_pdf_use_case = ValidatePDFUseCase(document_port=document_adapter)
-
-    print("Paso 1/4: Validando PDF...")
-    print("   → Analizando estructura del documento...")
-    validation_result = validate_pdf_use_case.execute(pdf_path)
-    show_progress("Validando PDF", 1, 4, "Validación completada")
-
-    if not validation_result["valid"]:
-        print(f"\n[ERROR] PDF inválido: {validation_result['message']}")
-        print(" Procesamiento cancelado debido a errores de validación")
-        return None
+    return validation_result
 
     print(f"\n[✓] {validation_result['message']}")
     print(f"   → Páginas totales: {validation_result['total_pages']}")

@@ -38,8 +38,7 @@ def clear_cache() -> None:
     """Limpia la caché OCR."""
     print("\nLimpiando caché OCR...")
     try:
-        # Implementar limpieza de caché aquí
-        # ocr_cache.clear()
+        ocr_cache.clear_cache(memory_only=False)
         print("[✓] Caché limpiada exitosamente")
     except Exception as e:
         logger.exception("Error limpiando caché")
@@ -50,9 +49,16 @@ def optimize_cache() -> None:
     """Optimiza la caché OCR."""
     print("\nOptimizando caché OCR...")
     try:
-        # Implementar optimización de caché aquí
-        # ocr_cache.optimize()
-        print("[✓] Caché optimizada exitosamente")
+        # Eliminar entradas antiguas o duplicadas
+        stats_before = ocr_cache.get_stats()
+        ocr_cache.vacuum_database()
+        stats_after = ocr_cache.get_stats()
+
+        print(f"[✓] Caché optimizada exitosamente")
+        print(f"    Entradas antes: {stats_before.get('total_entries', 0)}")
+        print(f"    Entradas después: {stats_after.get('total_entries', 0)}")
+        print(
+            f"    Espacio recuperado: {(stats_before.get('total_text_size_bytes', 0) - stats_after.get('total_text_size_bytes', 0))/1024:.2f} KB")
     except Exception as e:
         logger.exception("Error optimizando caché")
         print(f"[ERROR] Error al optimizar caché: {e}")

@@ -7,10 +7,13 @@ import re
 import time
 from typing import Any, Dict, List
 
-import config.state as state
+from shared.constants.config import AppConfig
 from adapters.providers.llm_factory import LLMProviderFactory
 from domain.ports.llm_provider import LLMProvider
 from infrastructure.logging_setup import logger
+
+# Instancia de configuración
+app_config = AppConfig()
 
 # Patrones comunes de corrección OCR
 OCR_PATTERNS = {
@@ -53,8 +56,7 @@ class LLMRefiner:
         """
         # Determinar el tipo de proveedor automáticamente basado en la configuración
         if provider_type is None:
-            provider_type = state.LLM_PROVIDER if hasattr(
-                state, 'LLM_PROVIDER') else None
+            provider_type = app_config.llm.provider if app_config.llm.provider else None
 
         # Crear el proveedor usando la fábrica
         self.provider = LLMProviderFactory.create_provider(provider_type)

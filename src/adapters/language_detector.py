@@ -9,7 +9,10 @@ import re
 from typing import Dict, Optional, List, Tuple
 from loguru import logger
 from config.language_detection import get_config
-from config import config as app_config
+from shared.constants.config import AppConfig
+
+# Instancia de configuración
+app_config = AppConfig()
 
 
 class LanguageDetector:

@@ -10,7 +10,11 @@ Funciones para preprocesamiento y análisis de imágenes.
 import cv2
 import numpy as np
 import pytesseract
+import logging
 from PIL import Image
+
+# Configurar logger
+logger = logging.getLogger(__name__)
 
 
 def correct_rotation(img_pil: Image.Image) -> Image.Image:
@@ -28,9 +32,12 @@ def correct_rotation(img_pil: Image.Image) -> Image.Image:
         angle = int([line for line in osd.split('\n')
                     if 'Rotate' in line][0].split(':')[-1])
         if angle != 0:
+            logger.info(f"Rotando imagen {angle} grados")
             return img_pil.rotate(-angle, expand=True)
-    except Exception:
-        pass  # Si falla, seguimos con la imagen original
+    except Exception as e:
+        logger.warning(
+            f"No se pudo determinar la rotación de la imagen: {str(e)}")
+        # Si falla, seguimos con la imagen original
     return img_pil
 
 
